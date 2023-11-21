@@ -12,6 +12,8 @@ def onAppStart(app):
     app.populationBottomBoundary = app.height-200
     app.paused = False
     app.stepsPerSecond = 1
+    generatePopulation(app)
+    generateInfectedMember(app)
 
 def generatePopulation(app):
     for i in range(100):
@@ -20,15 +22,16 @@ def generatePopulation(app):
         app.populationHealthyMembers.append([xVal,yVal])
 
 def redrawAll(app):
-    generatePopulation(app)
-    generateInfectedMember(app)
+    drawPopulation(app)
+
+
+def drawPopulation(app):
     for pair in app.populationHealthyMembers:
         drawCircle(pair[0],pair[1],10, fill = 'green')
     for pair in app.populationInfectedMembers:
         drawCircle(pair[0],pair[1],10, fill = 'red')
 
 def generateInfectedMember(app):
-    centerPeople = []
     boardCenterX = (app.populationRightBoundary+app.populationLeftBoundary)//2 
     boardCenterY = (app.populationTopBoundary+app.populationBottomBoundary)//2
     #randomly infect someone in the center of the board 
@@ -37,22 +40,19 @@ def generateInfectedMember(app):
             app.populationInfectedMembers.append(person)
             break
 
-def onStep(app):
-    if not app.paused:
+def onKeyPress(app, key):
+    if key == 'g':
         spreadInfection(app)
 
 def spreadInfection(app):
-    for infectedPerson in app.populationInfectedMembers:
-        for healthyPerson in app.populationHealthyMembers:
-            if distance(infectedPerson[0],healthyPerson[0], infectedPerson[1],healthyPerson[1]) < 10:
-                app.populationInfectedMembers.append(healthyPerson)
-                app.populationHealthyMembers.remove(healthyPerson)
+    x = [50,50]
+    app.populationInfectedMembers.append(x)
+    for infected in app.populationInfectedMembers:
+        for healthy in app.populationHealthyMembers:
+            if distance(infected[0],infected[1],healthy[0],healthy[1]) < 10:
+                app.populationInfectedMembers.append(healthy)
+                app.populationHealthyMembers.remove(healthy)
 
-
-def onKeyPress(app, key):
-    if key == 'p':
-        # toggle app.paused:
-        app.paused = not app.paused
 
 def distance(x1,x2,y1,y2):
     return (((x1-x2)**2+(y1-y2)**2)**.5)
