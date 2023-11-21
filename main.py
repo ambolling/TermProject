@@ -10,6 +10,8 @@ def onAppStart(app):
     app.populationRightBoundary = app.width-200
     app.populationTopBoundary = 200
     app.populationBottomBoundary = app.height-200
+    app.paused = False
+    app.stepsPerSecond = 1
 
 def generatePopulation(app):
     for i in range(100):
@@ -35,10 +37,25 @@ def generateInfectedMember(app):
             app.populationInfectedMembers.append(person)
             break
 
+def onStep(app):
+    if not app.paused:
+        spreadInfection(app)
+
+def spreadInfection(app):
+    for infectedPerson in app.populationInfectedMembers:
+        for healthyPerson in app.populationHealthyMembers:
+            if distance(infectedPerson[0],healthyPerson[0], infectedPerson[1],healthyPerson[1]) < 10:
+                app.populationInfectedMembers.append(healthyPerson)
+                app.populationHealthyMembers.remove(healthyPerson)
+
+
+def onKeyPress(app, key):
+    if key == 'p':
+        # toggle app.paused:
+        app.paused = not app.paused
+
 def distance(x1,x2,y1,y2):
     return (((x1-x2)**2+(y1-y2)**2)**.5)
-
-
 
 def main():
     runApp(width = 1000, height = 1000)
