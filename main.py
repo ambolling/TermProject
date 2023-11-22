@@ -35,11 +35,13 @@ class person():
         self.type = newType
         self.color = newColor
 
-
-
-def redrawAll(app):
+def main_redrawAll(app):
     drawPopulation(app)
     drawConnections(app)
+
+def welcome_redrawAll(app):
+    drawLabel("Welcome to Community Immunity", app.width/2, app.height/4, size = 50)
+    getPathogenParameters(app)
 
 
 def drawConnections(app):
@@ -68,20 +70,28 @@ def generateInfectedMember(app):
             app.populationInfectedMembers.append(person)
             break
     
-def onStep(app):
+def main_onStep(app):
     if not app.paused:
         spreadInfection(app)
         
+def main_onMousePress(app, mouseX, mouseY):
+    for person in app.populationHealthyMembers:
+        if distance(person.xVal, mouseX, person.yVal, mouseY) <= 10:
+            person.changeTypeColor('immune','lightBlue')
 
-def onKeyPress(app, key):
+def main_onKeyPress(app, key):
     if key == 'p':
         app.paused = not app.paused
+
+def welcome_onKeyPress(app, key):
+    if key == 'space':
+        setActiveScreen('main')
 
 def spreadInfection(app):
     for infectedPerson in app.populationInfectedMembers:
         app.connectedInfections[infectedPerson] = []
         for healthyPerson in app.populationHealthyMembers:
-            if distance(infectedPerson.xVal,healthyPerson.xVal,infectedPerson.yVal,healthyPerson.yVal) <= (100+10):
+            if distance(infectedPerson.xVal,healthyPerson.xVal,infectedPerson.yVal,healthyPerson.yVal) <= (100+10) and healthyPerson.type != 'immune':
                 healthyPerson.changeTypeColor('infected','red')
                 app.connectedInfections[infectedPerson].append(healthyPerson)
     for person in app.populationHealthyMembers:
@@ -96,6 +106,6 @@ def distance(x1,x2,y1,y2):
     return ((x2-x1)**2+(y2-y1)**2)**.5
 
 def main():
-    runApp(width = 1000, height = 1000)
+    runAppWithScreens(initialScreen = 'welcome', width = 1000, height = 1000)
 
 main()
