@@ -11,7 +11,8 @@ def onAppStart(app):
     app.populationTopBoundary = 200
     app.populationBottomBoundary = app.height-200
     app.paused = False
-    app.stepsPerSecond = 1
+    app.stepsPerSecond = .5
+    app.connectedInfections = dict()
     generatePopulation(app)
     generateInfectedMember(app)
 
@@ -38,6 +39,14 @@ class person():
 
 def redrawAll(app):
     drawPopulation(app)
+    drawConnections(app)
+
+
+def drawConnections(app):
+    for key in app.connectedInfections:
+        for value in app.connectedInfections[key]:
+            drawLine(key.xVal, key.yVal, value.xVal, value.yVal, opacity = 25, fill = 'grey')
+
 
 
 def drawPopulation(app):
@@ -59,16 +68,22 @@ def generateInfectedMember(app):
             app.populationInfectedMembers.append(person)
             break
     
+def onStep(app):
+    if not app.paused:
+        spreadInfection(app)
+        
 
 def onKeyPress(app, key):
-    if key == 'g':
-        spreadInfection(app)
+    if key == 'p':
+        app.paused = not app.paused
 
 def spreadInfection(app):
     for infectedPerson in app.populationInfectedMembers:
+        app.connectedInfections[infectedPerson] = []
         for healthyPerson in app.populationHealthyMembers:
             if distance(infectedPerson.xVal,healthyPerson.xVal,infectedPerson.yVal,healthyPerson.yVal) <= (100+10):
                 healthyPerson.changeTypeColor('infected','red')
+                app.connectedInfections[infectedPerson].append(healthyPerson)
     for person in app.populationHealthyMembers:
         if person.type == 'infected':
             app.populationInfectedMembers.append(person)
