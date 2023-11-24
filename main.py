@@ -99,9 +99,8 @@ def drawConnections(app):
         for value in app.connectedInfections[key]:
             drawLine(key.xVal, key.yVal, value.xVal, value.yVal, opacity = 25, fill = 'grey')
 
-
 def calculatePersonSize(app):
-    personSize = 150/app.populationSize
+    personSize = 100/app.populationSize+5
     return personSize
 
 def drawPopulation(app):
