@@ -17,8 +17,8 @@ def onAppStart(app):
     app.viralRadiusOptions = dict()
     app.populationSizes = dict()
     app.populationSize = 100
-    generatePopulation(app)
-    generateInfectedMember(app)
+    # app.personSize = 10
+
 
 def generatePopulation(app):
     for i in range(app.populationSize):
@@ -26,6 +26,7 @@ def generatePopulation(app):
         yVal = random.randint(app.populationTopBoundary,app.populationBottomBoundary)
         newPerson = person(xVal, yVal, 'healthy', 'green')
         app.populationHealthyMembers.append(newPerson)
+
     
 
 class person():
@@ -40,6 +41,8 @@ class person():
         self.color = newColor
 
 def main_redrawAll(app):
+    if len(app.populationInfectedMembers) == 0:
+        generateInfectedMember(app)
     drawPopulation(app)
     drawConnections(app)
 
@@ -47,6 +50,7 @@ def welcome_redrawAll(app):
     drawLabel("Welcome to Community Immunity", app.width/2, app.height/4, size = 50)
     getPathogenParameters(app)
     selectPopulationSize(app)
+
 
 def getPathogenParameters(app):
     selectPathogenContagiousLevel(app)
@@ -58,11 +62,11 @@ def selectPathogenContagiousLevel(app):
     drawLabel('40',app.width/2, app.height/3+30, size = 20)
     drawCircle(app.width/2, app.height/3, 10, fill = 'red')
     app.viralRadiusOptions[40]=[app.width/2, app.height/3]
+
     drawLabel('100',app.width/2+300, app.height/3+30, size = 20)
     drawCircle(app.width/2+300, app.height/3, 10, fill = 'red')
     app.viralRadiusOptions[100]=[app.width/2+300, app.height/3]
-    # make a dictionary of radius size to x,y coordinates matching where the circle should be for that size
-    # app.viralRadiusOptions.append([app.width/2+300, app.height/3+30])
+
 
 def selectPopulationSize(app):
     drawLabel('Select a size for your population:',app.width/4, app.height/2,size = 25, fill = 'pink')
@@ -83,8 +87,6 @@ def welcome_onKeyPress(app, key):
     
 def welcome_onMousePress(app, mouseX, mouseY):
     for value in app.populationSizes:
-        print(distance(mouseX,app.populationSizes[value][0], mouseY, app.populationSizes[value][1]))
-        print(value)
         if distance(mouseX,app.populationSizes[value][0], mouseY, app.populationSizes[value][1]) <= 10:
             print(app.populationSize)
             app.populationSize = value
@@ -92,20 +94,26 @@ def welcome_onMousePress(app, mouseX, mouseY):
         if distance(mouseX, app.viralRadiusOptions[value][0], mouseY, app.viralRadiusOptions[value][1]) <= 10:
             app.viralRadius = value
 
-
-
 def drawConnections(app):
     for key in app.connectedInfections:
         for value in app.connectedInfections[key]:
             drawLine(key.xVal, key.yVal, value.xVal, value.yVal, opacity = 25, fill = 'grey')
 
 
+def calculatePersonSize(app):
+    personSize = 150/app.populationSize
+    return personSize
 
 def drawPopulation(app):
-    for val in app.populationHealthyMembers:
-        drawCircle(val.xVal, val.yVal, 10, fill = val.color)
-    for val in app.populationInfectedMembers:
-        drawCircle(val.xVal, val.yVal, 10, fill = val.color)
+    if len(app.populationHealthyMembers) == 0:
+        generatePopulation(app)
+    else:
+        personSize = calculatePersonSize(app)
+        for val in app.populationHealthyMembers:
+            drawCircle(val.xVal, val.yVal, personSize, fill = val.color)
+        for val in app.populationInfectedMembers:
+            drawCircle(val.xVal, val.yVal, personSize, fill = val.color)
+
 
 def generateInfectedMember(app):
     boardCenterX = (app.populationRightBoundary+app.populationLeftBoundary)//2 
@@ -145,8 +153,6 @@ def spreadInfection(app):
         if person.type == 'infected':
             app.populationInfectedMembers.append(person)
             app.populationHealthyMembers.remove(person)
-
-
 
 
 def distance(x1,x2,y1,y2):
