@@ -17,7 +17,7 @@ def onAppStart(app):
     app.viralRadiusOptions = dict()
     app.populationSizes = dict()
     app.populationSize = 100
-    # app.personSize = 10
+    app.reproductionNumber = None
 
 
 def generatePopulation(app):
@@ -43,6 +43,7 @@ class person():
 def main_redrawAll(app):
     if len(app.populationInfectedMembers) == 0:
         generateInfectedMember(app)
+    drawMainLabels(app)
     drawPopulation(app)
     drawConnections(app)
 
@@ -51,12 +52,14 @@ def welcome_redrawAll(app):
     getPathogenParameters(app)
     selectPopulationSize(app)
 
+def drawMainLabels(app):
+    pass
 
 def getPathogenParameters(app):
     selectPathogenContagiousLevel(app)
 
 def selectPathogenContagiousLevel(app):
-    drawLabel('Select a radius for infection:',app.width/4, app.height/3,size = 25, fill = 'pink')
+    drawLabel('Select a radius for infection:',app.width/4, app.height/3,size = 25, fill = 'black')
     drawLine(app.width/2, app.height/3, app.width/2+300, app.height/3,fill = 'grey')
 
     drawLabel('40',app.width/2, app.height/3+30, size = 20)
@@ -69,7 +72,7 @@ def selectPathogenContagiousLevel(app):
 
 
 def selectPopulationSize(app):
-    drawLabel('Select a size for your population:',app.width/4, app.height/2,size = 25, fill = 'pink')
+    drawLabel('Select a size for your population:',app.width/4, app.height/2,size = 25, fill = 'black')
     drawLine(app.width/2, app.height/2, app.width/2+300, app.height/2,fill = 'grey')
     
     drawLabel('10',app.width/2, app.height/2+30, size = 20)
@@ -121,7 +124,7 @@ def generateInfectedMember(app):
     for person in app.populationHealthyMembers:
         xVal = person.xVal
         yVal = person.yVal
-        if distance(xVal, boardCenterX, yVal,boardCenterY) < 100:
+        if distance(xVal, boardCenterX, yVal,boardCenterY) < 200:
             person.changeTypeColor('infected','red')
             app.populationHealthyMembers.remove(person)
             app.populationInfectedMembers.append(person)
@@ -148,6 +151,8 @@ def spreadInfection(app):
             if distance(infectedPerson.xVal,healthyPerson.xVal,infectedPerson.yVal,healthyPerson.yVal) <= (app.viralRadius+10) and healthyPerson.type != 'immune':
                 healthyPerson.changeTypeColor('infected','red')
                 app.connectedInfections[infectedPerson].append(healthyPerson)
+            if app.reproductionNumber != None and len(app.connectedInfections[infectedPerson]) == app.reproductionNumber:
+                break
     for person in app.populationHealthyMembers:
         if person.type == 'infected':
             app.populationInfectedMembers.append(person)
