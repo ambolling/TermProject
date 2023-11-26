@@ -6,8 +6,8 @@ def onAppStart(app):
     app.populationHealthyMembers = []
     app.populationInfectedMembers = []
     app.healthyColor = 'green'
-    app.populationLeftBoundary = 200
-    app.populationRightBoundary = app.width-200
+    app.populationLeftBoundary = 300
+    app.populationRightBoundary = app.width-100
     app.populationTopBoundary = 200
     app.populationBottomBoundary = app.height-200
     app.paused = False
@@ -20,15 +20,12 @@ def onAppStart(app):
     app.reproductionNumber = None
     app.reproductionNumbers = dict()
 
-
 def generatePopulation(app):
     for i in range(app.populationSize):
         xVal = random.randint(app.populationLeftBoundary,app.populationRightBoundary)
         yVal = random.randint(app.populationTopBoundary,app.populationBottomBoundary)
         newPerson = person(xVal, yVal, 'healthy', 'green')
         app.populationHealthyMembers.append(newPerson)
-
-    
 
 class person():
     def __init__(self, xVal, yVal, type, color):
@@ -49,12 +46,16 @@ def main_redrawAll(app):
     drawConnections(app)
 
 def welcome_redrawAll(app):
-    drawLabel("Welcome to Community Immunity", app.width/2, app.height/6, size = 50)
+    drawLabel("Welcome to Community Immunity Simlutor", app.width/2, app.height/8, size = 50)
     getPathogenParameters(app)
 
-
 def drawMainLabels(app):
-    pass
+    drawLabel("Community Immunity Simulator", app.width/2, app.height/16, size = 50)
+    drawLabel('Size of Population', app.width/8, app.width/8, size = 20)
+    drawLabel(app.populationSize, (app.width/8), (app.width/8)+25, size = 20)
+    drawLabel('Radius of infection', (app.width/8), (app.width/8)*2, size = 20)
+    drawLabel(app.viralRadius, (app.width/8), (app.width/8)*2+25, size = 20)
+
 
 def getPathogenParameters(app):
     selectPathogenContagiousLevel(app)
@@ -84,19 +85,19 @@ def selectPopulationSize(app):
 
     drawLabel('300',(app.width/8)*7, (app.height/8)*3+25, size = 20)
     drawCircle((app.width/8)*7, (app.height/8)*3, 10, fill = 'red')
-    app.populationSizes[10] = [(app.width/8)*7, (app.height/8)*3]
+    app.populationSizes[300] = [(app.width/8)*7, (app.height/8)*3]
 
 def selectReproductionNumber(app):
-    drawLabel('Select a reproduction number for your pathogen:',app.width/4, (app.height/2),size = 20, fill = 'black')
-    drawLine(app.width/4, app.height/2,app.width/4+300, (app.height/4)*3,fill = 'grey')
+    drawLabel('Transmissability of your pathogen:',app.width/4, (app.height/2),size = 20, fill = 'black')
+    drawLine((app.width/8)*4, (app.height/8)*4,(app.width/8)*7, (app.height/8)*4,fill = 'grey')
 
-    drawLabel('None',app.width/2, app.height/2+30, size = 20)
+    drawLabel('1',app.width/2, app.height/2+30, size = 20)
     drawCircle(app.width/2, app.height/2, 10, fill = 'red')
-    app.reproductionNumbers[None] = [app.width/2, app.height/2]
+    app.reproductionNumbers[1] = [app.width/2, app.height/2]
 
-    drawLabel('10',app.width/2+300, app.height/2+30, size = 20)
-    drawCircle(app.width/2+300, app.height/2, 10, fill = 'red')
-    app.reproductionNumbers[10] = [app.width/2+300, app.height/2]
+    drawLabel('All',(app.width/8)*7, app.height/2+30, size = 20)
+    drawCircle((app.width/8)*7, app.height/2, 10, fill = 'red')
+    app.reproductionNumbers[None] = [app.width/2+300, app.height/2]
 
 def welcome_onKeyPress(app, key):
     if key == 'space':
@@ -110,6 +111,9 @@ def welcome_onMousePress(app, mouseX, mouseY):
     for value in app.viralRadiusOptions:
         if distance(mouseX, app.viralRadiusOptions[value][0], mouseY, app.viralRadiusOptions[value][1]) <= 10:
             app.viralRadius = value
+    for value in app.reproductionNumbers:
+        if distance(mouseX, app.reproductionNumbers[value][0], mouseY, app.reproductionNumbers[value][1]) <= 10:
+            app.reproductionNumber = value
 
 def drawConnections(app):
     for key in app.connectedInfections:
@@ -119,6 +123,15 @@ def drawConnections(app):
 def calculatePersonSize(app):
     personSize = 100/app.populationSize+5
     return personSize
+
+def calculatePercentageImmune(app):
+    pass
+
+def calculatePercentageInfected(app):
+    pass
+
+def calculatePercentageHealhty(app):
+    pass
 
 def drawPopulation(app):
     if len(app.populationHealthyMembers) == 0:
@@ -171,7 +184,6 @@ def spreadInfection(app):
         if person.type == 'infected':
             app.populationInfectedMembers.append(person)
             app.populationHealthyMembers.remove(person)
-
 
 def distance(x1,x2,y1,y2):
     return ((x2-x1)**2+(y2-y1)**2)**.5
