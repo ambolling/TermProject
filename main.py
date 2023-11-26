@@ -3,6 +3,10 @@ import random
 import math
 
 def onAppStart(app):
+    resetApp(app)
+
+def resetApp(app):
+    app.populationAllMembers = []
     app.populationHealthyMembers = []
     app.populationInfectedMembers = []
     app.populationImmuneMembers = []
@@ -27,7 +31,7 @@ def onAppStart(app):
     app.populationSize = 100
     app.reproductionNumber = None
     app.reproductionNumbers = dict()
-
+    app.finished = False
 
 def generatePopulation(app):
     for i in range(app.populationSize):
@@ -35,6 +39,8 @@ def generatePopulation(app):
         yVal = random.randint(app.populationTopBoundary,app.populationBottomBoundary)
         newPerson = person(xVal, yVal, 'healthy', 'green')
         app.populationHealthyMembers.append(newPerson)
+        app.populationAllMembers.append(newPerson)
+
 
 class person():
     def __init__(self, xVal, yVal, type, color):
@@ -51,16 +57,48 @@ def main_redrawAll(app):
     if len(app.populationInfectedMembers) == 0:
         generateInfectedMember(app)
     drawMainLabels(app)
-    drawPopulation(app)
-    drawConnections(app)
     drawPlayAndPause(app)
+    if app.finished == False:
+        drawPopulation(app)
+        drawConnections(app)
+    else:
+        drawPopulation(app)
+        drawConnections(app)
+        drawFinishedLabels(app)
+        
+def isSimulationFinished(app):
+    if len(app.populationInfectedMembers) > 1:
+        count = 0
+        if countHealthy(app) == 0:
+            app.finished = True
+            return True
+        for value in app.connectedInfections:
+            if len(app.connectedInfections[value]) == 0:
+                count += 1
+        if count == len(app.connectedInfections):
+            app.finished = True
+            return True
+    return False
+    
 
 def welcome_redrawAll(app):
     drawLabel("Welcome to Community Immunity Simlutor", app.width/2, app.height/8, size = 50)
+
+def welcome_onKeyPress(app, key):
+    if key == 'space':
+        setActiveScreen('parameters')
+
+def parameters_redrawAll(app):
+    drawLabel("Welcome to Community Immunity Simlutor", app.width/2, app.height/8, size = 50)
     getPathogenParameters(app)
+
+def drawFinishedLabels(app):
+    drawLabel('DONE', app.width/2, app.width/2, size = 100)
+    
 
 def drawMainLabels(app):
     drawLabel("Community Immunity Simulator", app.width/2, app.height/16, size = 50)
+    drawLabel('Press r key to reset simulator',app.width/2, (app.height/18)*2, size = 18 )
     drawLabel('Size of Population', app.width/8, app.width/8, size = 20)
     drawLabel(app.populationSize, (app.width/8), (app.width/8)+25, size = 20)
     drawLabel('Radius of infection', (app.width/8), (app.width/8)*2, size = 20)
@@ -121,11 +159,11 @@ def selectReproductionNumber(app):
     drawCircle((app.width/8)*7, app.height/2, 10, fill = 'red')
     app.reproductionNumbers[None] = [app.width/2+300, app.height/2]
 
-def welcome_onKeyPress(app, key):
+def parameters_onKeyPress(app, key):
     if key == 'space':
         setActiveScreen('main')
     
-def welcome_onMousePress(app, mouseX, mouseY):
+def parameters_onMousePress(app, mouseX, mouseY):
     for value in app.populationSizes:
         if distance(mouseX,app.populationSizes[value][0], mouseY, app.populationSizes[value][1]) <= 10:
             print(app.populationSize)
@@ -140,7 +178,8 @@ def welcome_onMousePress(app, mouseX, mouseY):
 def drawConnections(app):
     for key in app.connectedInfections:
         for value in app.connectedInfections[key]:
-            drawLine(key.xVal, key.yVal, value.xVal, value.yVal, opacity = 25, fill = 'grey')
+            # if value not in app.populationInfectedMembers:
+                drawLine(key.xVal, key.yVal, value.xVal, value.yVal, opacity = 25, fill = 'grey') 
 
 def calculatePersonSize(app):
     personSize = 100/app.populationSize+5
@@ -170,6 +209,13 @@ def calculatePercentageHealthy(app):
     else:
         return f'{percentage}%'
 
+def countHealthy(app):
+    count = 0
+    for person in app.populationAllMembers:
+        if person.type == 'healthy':
+            count += 1
+    return count
+
 def drawPopulation(app):
     if len(app.populationHealthyMembers) == 0:
         generatePopulation(app)
@@ -181,6 +227,7 @@ def drawPopulation(app):
             drawCircle(val.xVal, val.yVal, personSize, fill = val.color)
         for val in app.populationImmuneMembers:
             drawCircle(val.xVal, val.yVal, personSize, fill = val.color, border = 'black')
+
 
 def generateInfectedMember(app):
     boardCenterX = (app.populationRightBoundary+app.populationLeftBoundary)//2 
@@ -198,13 +245,20 @@ def generateInfectedMember(app):
 def main_onStep(app):
     if not app.paused:
         spreadInfection(app)
-        
+    if isSimulationFinished(app):
+        app.paused = True
+
+    
 def main_onMousePress(app, mouseX, mouseY):
     for person in app.populationHealthyMembers:
         if distance(person.xVal, mouseX, person.yVal, mouseY) <= 10:
             person.changeTypeColor('immune','lightBlue')
             app.populationHealthyMembers.remove(person)
             app.populationImmuneMembers.append(person)
+    if distance(mouseX, app.pauseButtonX, mouseY, app.pauseButtonY) <= 20:
+        app.paused = True
+    if distance(mouseX, app.playButtonX, mouseY, app.playButtonY) <= 20:
+        app.paused = False 
 
 def main_onMouseDrag(app, mouseX, mouseY):
     for person in app.populationHealthyMembers:
@@ -216,13 +270,16 @@ def main_onMouseDrag(app, mouseX, mouseY):
 def main_onKeyPress(app, key):
     if key == 'p':
         app.paused = not app.paused
-
+    if key == 'r':
+        resetApp(app)
+        setActiveScreen('parameters')
 
 def spreadInfection(app):
     for infectedPerson in app.populationInfectedMembers:
-        app.connectedInfections[infectedPerson] = []
+        if infectedPerson not in app.connectedInfections:
+            app.connectedInfections[infectedPerson] = []
         for healthyPerson in app.populationHealthyMembers:
-            if distance(infectedPerson.xVal,healthyPerson.xVal,infectedPerson.yVal,healthyPerson.yVal) <= (app.viralRadius+10) and healthyPerson.type != 'immune':
+            if distance(infectedPerson.xVal,healthyPerson.xVal,infectedPerson.yVal,healthyPerson.yVal) <= (app.viralRadius+10) and healthyPerson.type == 'healthy':
                 healthyPerson.changeTypeColor('infected','red')
                 app.connectedInfections[infectedPerson].append(healthyPerson)
             if app.reproductionNumber != None and len(app.connectedInfections[infectedPerson]) == app.reproductionNumber:
