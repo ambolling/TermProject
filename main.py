@@ -67,6 +67,9 @@ def main_redrawAll(app):
         drawFinishedLabels(app)
         
 def isSimulationFinished(app):
+    if noHealthyInRange(app):
+        app.finished = True
+        return True
     if len(app.populationInfectedMembers) > 1:
         count = 0
         if countHealthy(app) == 0:
@@ -77,9 +80,24 @@ def isSimulationFinished(app):
                 count += 1
         if count == len(app.connectedInfections):
             app.finished = True
-            return True
-    return False
-    
+            return True 
+
+        
+def noHealthyInRange(app):
+    if len(app.populationInfectedMembers) != 0:
+        for infectedPerson in app.populationAllMembers:
+            listOfNeighbors = []
+            if infectedPerson.type == 'infected':
+                for value in app.populationAllMembers:
+                    if distance(infectedPerson.xVal,value.xVal,infectedPerson.yVal,value.yVal) <= (app.viralRadius+10):
+                        listOfNeighbors.append(value)
+            for value in listOfNeighbors:
+                if value.type == 'healthy':
+                    return False
+        return True
+    else:
+        return False
+                    
 
 def welcome_redrawAll(app):
     drawLabel("Welcome to Community Immunity Simlutor", app.width/2, app.height/8, size = 50)
@@ -247,6 +265,7 @@ def main_onStep(app):
         spreadInfection(app)
     if isSimulationFinished(app):
         app.paused = True
+        app.finished = True
 
     
 def main_onMousePress(app, mouseX, mouseY):
@@ -268,8 +287,6 @@ def main_onMouseDrag(app, mouseX, mouseY):
             app.populationImmuneMembers.append(person)
 
 def main_onKeyPress(app, key):
-    if key == 'p':
-        app.paused = not app.paused
     if key == 'r':
         resetApp(app)
         setActiveScreen('parameters')
