@@ -205,6 +205,8 @@ def parameters_onKeyPress(app, key):
 
 def parameters_redrawAll(app):
     drawLabel("Welcome to Community Immunity Simlutor", app.width/2, app.height/8, size = 50)
+    drawLabel('Select your parameters', app.width/2, (app.height/16)*3, size = 20)
+    drawLabel('Press the space bar to begin the simulation', app.width/2, (app.height/16)*14, size = 20)
     getPathogenParameters(app)
     
 def parameters_onMousePress(app, mouseX, mouseY):
