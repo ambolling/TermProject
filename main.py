@@ -20,9 +20,9 @@ def resetApp(app):
     app.pauseButtonY = app.populationTopBoundary-50
     app.playButtonX = (app.populationLeftBoundary+app.populationRightBoundary)/2-30
     app.playButtonY = app.populationTopBoundary-50
-    app.playButtonPoints = [(app.populationLeftBoundary+app.populationRightBoundary)/2-70,app.populationTopBoundary-50,
-                            (app.populationLeftBoundary+app.populationRightBoundary)/2-70,app.populationTopBoundary-10,
-                            (app.populationLeftBoundary+app.populationRightBoundary)/2-10,app.populationTopBoundary-20]
+    app.playButtonPoints = [(app.populationLeftBoundary+app.populationRightBoundary)/2-40,app.populationTopBoundary-60,
+                            (app.populationLeftBoundary+app.populationRightBoundary)/2-40,app.populationTopBoundary-40,
+                            (app.populationLeftBoundary+app.populationRightBoundary)/2-15,app.populationTopBoundary-50]
     app.stepsPerSecond = .5
     app.connectedInfections = dict()
     app.viralRadius = 100
@@ -152,7 +152,7 @@ def drawFinishedLabels(app):
     
 def drawPlayAndPause(app):
     drawCircle(app.playButtonX, app.playButtonY, 20, fill = 'white', border = 'black')
-    # drawPolygon(*app.playButtonPoints, fill = 'orange', border = 'black')
+    drawPolygon(*app.playButtonPoints, fill = 'black', border = 'black')
     drawCircle(app.pauseButtonX, app.pauseButtonY, 20, fill = 'white', border = 'black')
     drawRect(app.pauseButtonX-10,app.pauseButtonY-10, 8, 20, fill = 'black')
     drawRect(app.pauseButtonX+2,app.pauseButtonY-10, 8, 20, fill = 'black')
@@ -161,6 +161,7 @@ def getPathogenParameters(app):
     selectPathogenContagiousLevel(app)
     selectPopulationSize(app)
     selectReproductionNumber(app)
+    selectStartingNumberOfInfected(app)
 
 def selectPathogenContagiousLevel(app):
     drawLabel('Select a radius of infection for your pathogen: ',app.width/4, app.height/4,size = 20, fill = 'black')
@@ -198,6 +199,11 @@ def selectReproductionNumber(app):
     drawLabel('All',(app.width/8)*7, app.height/2+30, size = 20)
     drawCircle((app.width/8)*7, app.height/2, 10, fill = 'red')
     app.reproductionNumbers[None] = [app.width/2+300, app.height/2]
+
+def selectStartingNumberOfInfected(app):
+    #define parameter or number of infected individuals spawned in beginning
+    drawLabel('Number of individuals initially infected:',app.width/4, (app.height/8)*5,size = 20, fill = 'black')
+    drawLine((app.width/8)*4, (app.height/8)*5,(app.width/8)*7, (app.height/8)*5,fill = 'grey')
 
 def parameters_onKeyPress(app, key):
     if key == 'space':
