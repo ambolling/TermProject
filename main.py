@@ -26,16 +26,15 @@ def resetApp(app):
     app.stepsPerSecond = .5
     app.connectedInfections = dict()
     app.viralRadius = 100
-    app.viralRadiusOptions = dict()
-    app.populationSizes = dict()
     app.populationSize = 10
     app.reproductionNumber = None
-    app.reproductionNumbers = dict()
     app.finished = False
     app.populationSelected = False
     app.populationSelectorCircleX = (app.width/8)*4
     app.radiusSelected = False
     app.radiusSelectorCircleX = (app.width/8)*4
+    app.reproductionNumberSelected = False
+    app.reproductionNumberSelectorCircleX = app.width/2
 
     #Image Citation: Image by <a href="https://pixabay.com/users/thedigitalartist-202249/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=4922384">Pete Linforth</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=4922384">Pixabay</a>
     app.vb = 'virusbackground.jpg'
@@ -219,14 +218,10 @@ def selectPopulationSize(app):
 def selectReproductionNumber(app):
     drawLabel('Transmissability of your pathogen:',app.width/4, (app.height/2),size = 20, fill = 'black')
     drawLine((app.width/8)*4, (app.height/8)*4,(app.width/8)*7, (app.height/8)*4,fill = 'grey')
+    if app.reproductionNumber != None:
+        drawLabel(str(app.reproductionNumber)+'%',((app.width/8)*4+(app.width/8)*7)/2, app.height/2+30, size = 20)
+    drawCircle(app.reproductionNumberSelectorCircleX, app.height/2, 10, fill = 'red')
 
-    drawLabel('1',app.width/2, app.height/2+30, size = 20)
-    drawCircle(app.width/2, app.height/2, 10, fill = 'red')
-    app.reproductionNumbers[1] = [app.width/2, app.height/2]
-
-    drawLabel('All',(app.width/8)*7, app.height/2+30, size = 20)
-    drawCircle((app.width/8)*7, app.height/2, 10, fill = 'red')
-    app.reproductionNumbers[None] = [app.width/2+300, app.height/2]
 
 def selectStartingNumberOfInfected(app):
     #define parameter or number of infected individuals spawned in beginning
@@ -249,14 +244,13 @@ def parameters_onMousePress(app, mouseX, mouseY):
         app.populationSelected = True
     if distance(mouseX,app.radiusSelectorCircleX, mouseY, app.height/4) <= 10:
         app.radiusSelected = True
-
-    for value in app.reproductionNumbers:
-        if distance(mouseX, app.reproductionNumbers[value][0], mouseY, app.reproductionNumbers[value][1]) <= 10:
-            app.reproductionNumber = value
+    if distance(mouseX,app.reproductionNumberSelectorCircleX, mouseY, app.height/2) <= 10:
+        app.reproductionNumberSelected = True
 
 def parameters_onMouseRelease(app, mouseX, mouseY):
     app.populationSelected = False
     app.radiusSelected = False
+    app.reproductionNumberSelected = False
 
 
 def parameters_onMouseDrag(app, mouseX, mouseY):
@@ -308,6 +302,20 @@ def parameters_onMouseDrag(app, mouseX, mouseY):
             elif distanceDotFromStart >= 350 and distanceDotFromStart <=400:
                 app.viralRadius =100
             app.radiusSelectorCircleX = mouseX
+    if app.reproductionNumberSelected:
+        if ((app.width/8)*4) <= mouseX and mouseX <= (app.width/8)*7:
+            distanceDotFromStart = distance(mouseX,app.width/2,mouseY, app.height/2)
+            if distanceDotFromStart <= 50:
+                app.reproductionNumber = 10
+            elif distanceDotFromStart >= 50 and distanceDotFromStart <=100:
+                app.reproductionNumber =20
+            elif distanceDotFromStart >= 150 and distanceDotFromStart <=200:
+                app.reproductionNumber =40
+            elif distanceDotFromStart >= 250 and distanceDotFromStart <=300:
+                app.reproductionNumber =80
+            elif distanceDotFromStart >= 350 and distanceDotFromStart <=400:
+                app.reproductionNumber =100
+            app.reproductionNumberSelectorCircleX = mouseX
             
 
 def drawConnections(app):
