@@ -65,6 +65,7 @@ def main_redrawAll(app):
     if len(app.populationInfectedMembers) == 0:
         generateInfectedMember(app)
     drawMainLabels(app)
+
     drawPlayAndPause(app)
     if app.finished == False:
         drawPopulation(app)
@@ -76,27 +77,35 @@ def main_redrawAll(app):
 
 def drawMainLabels(app):
     drawBackground(app)
-    drawRect(20, app.height/8-10, 215, (app.height/8)*6, fill = 'lavender')
+    drawRect(20, (app.width/8)*4-10, 215, (app.height/8)*6, fill = 'lavender')
+    drawRect(20, (app.width/8), 215, (app.height/8)*2, fill = 'lavender')
+    drawLabel('Key',(20+215)/2, 140,size = 20)
+    drawCircle(40,170, 10, fill = 'seaGreen')
+    drawLabel(' = Healthy', 100, 170, align = 'center', size = 20)
+    drawCircle(40,200, 10, fill = 'red')
+    drawLabel(' = Infected', 100, 200, align = 'center', size = 20)
+    drawCircle(40,230, 10, fill = 'lightBlue')
+    drawLabel(' = Immune', 100, 230, align = 'center', size = 20)
     drawLine(app.populationLeftBoundary-10, app.populationTopBoundary-10, app.populationRightBoundary+10, app.populationTopBoundary-10)
     drawLine(app.populationLeftBoundary-10, app.populationTopBoundary-10, app.populationLeftBoundary-10, app.populationBottomBoundary+10)
     drawLine(app.populationLeftBoundary-10, app.populationBottomBoundary+10, app.populationRightBoundary+10, app.populationBottomBoundary+10)
     drawLine(app.populationRightBoundary+10, app.populationBottomBoundary+10, app.populationRightBoundary+10, app.populationTopBoundary-10)
     drawRect(app.populationLeftBoundary-10,app.populationTopBoundary-10, (app.populationRightBoundary+10)-(app.populationLeftBoundary-10),abs((app.populationTopBoundary-10)-(app.populationBottomBoundary+10)), fill = 'white')
     drawLabel("Community Immunity Simulator", app.width/2, app.height/16, size = 50, bold = True, fill = 'white')
-    drawLabel('Press r key to reset simulator',app.width/2, (app.height/18)*2, size = 18,bold = True, fill = 'white' )
-    drawLabel('Size of Population', app.width/8, app.width/8, size = 20)
-    drawLabel(app.populationSize, (app.width/8), (app.width/8)+25, size = 20)
-    drawLabel('Radius of infection', (app.width/8), (app.width/8)*2, size = 20)
-    drawLabel(app.viralRadius, (app.width/8), (app.width/8)*2+25, size = 20)
-    drawLabel('Percentage Immune', (app.width/8), (app.width/8)*3, size = 20)
-    drawLabel(calculatePercentageImmune(app), (app.width/8), (app.width/8)*3+25, size = 20)
-    drawLabel('Percentage Infected', (app.width/8), (app.width/8)*4, size = 20)
-    drawLabel(calculatePercentageInfected(app), (app.width/8), (app.width/8)*4+25, size = 20)
-    drawLabel('Percentage Healthy', (app.width/8), (app.width/8)*5, size = 20)
-    drawLabel(calculatePercentageHealthy(app), (app.width/8), (app.width/8)*5+25, size = 20)
+    drawLabel('Click or click and drag to vaccinate members of the population | Press r key to reset simulator',app.width/2, (app.height/18)*2, size = 18,bold = True, fill = 'white' )
+    drawLabel('Size of Population', app.width/8, app.width/8*4, size = 20)
+    drawLabel(app.populationSize, (app.width/8), (app.width/8)*4+25, size = 20)
+    drawLabel('Radius of infection', (app.width/8), (app.width/8)*4+75, size = 20)
+    drawLabel(app.viralRadius, (app.width/8), (app.width/8)*4+100, size = 20)
+    drawLabel('Percentage Immune', (app.width/8), (app.width/8)*4+150, size = 20)
+    drawLabel(calculatePercentageImmune(app), (app.width/8), (app.width/8)*4+175, size = 20)
+    drawLabel('Percentage Infected', (app.width/8), (app.width/8)*5, size = 20)
+    drawLabel(calculatePercentageInfected(app), (app.width/8), (app.width/8)*6+25, size = 20)
+    drawLabel('Percentage Healthy', (app.width/8), (app.width/8)*7, size = 20)
+    drawLabel(calculatePercentageHealthy(app), (app.width/8), (app.width/8)*8+25, size = 20)
 
 def main_onStep(app):
-    if not app.paused:
+    if not app.paused and not isSimulationFinished(app):
         spreadInfection(app)
     if isSimulationFinished(app):
         app.paused = True
@@ -184,21 +193,25 @@ def drawFinishedLabels(app):
     drawLabel('DONE', app.width/2, app.width/2, size = 100)
     
 def drawPlayAndPause(app):
-    drawCircle(app.playButtonX, app.playButtonY, 20, fill = 'white', border = 'black')
+    if app.paused:
+        drawCircle(app.playButtonX, app.playButtonY, 20, fill = 'white', border = 'black')
+        drawCircle(app.pauseButtonX, app.pauseButtonY, 20, fill = 'darkGray', border = 'black')
+    else:
+        drawCircle(app.playButtonX, app.playButtonY, 20, fill = 'darkGray', border = 'black')
+        drawCircle(app.pauseButtonX, app.pauseButtonY, 20, fill = 'white', border = 'black')
     drawPolygon(*app.playButtonPoints, fill = 'black', border = 'black')
-    drawCircle(app.pauseButtonX, app.pauseButtonY, 20, fill = 'white', border = 'black')
     drawRect(app.pauseButtonX-10,app.pauseButtonY-10, 8, 20, fill = 'black')
     drawRect(app.pauseButtonX+2,app.pauseButtonY-10, 8, 20, fill = 'black')
 
 def getPathogenParameters(app):
-    drawRect((app.width/20),(app.height/8)+50,(app.width/20)*18,(app.height/4)*3, fill = 'white')
+    drawRect((app.width/20),(app.height/8)+50,(app.width/20)*18,(app.height/4)*2, fill = 'white')
     selectPathogenRadius(app)
     selectPopulationSize(app)
     selectReproductionNumber(app)
     selectStartingNumberOfInfected(app)
 
 def selectPathogenRadius(app):
-    drawLabel('Select a radius of infection for your pathogen: ',app.width/4, app.height/4,size = 20, fill = 'black')
+    drawLabel('Select a radius of infection for your pathogen: ',app.width/4, app.height/4,size = 18, fill = 'black')
     drawLine((app.width/8)*4, (app.height/4), (app.width/8)*7, app.height/4,fill = 'grey')
 
     drawLabel(str(app.viralRadius),((app.width/8)*4+(app.width/8)*7)/2, app.height/4+25, size = 20)
