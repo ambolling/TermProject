@@ -34,6 +34,8 @@ def resetApp(app):
     app.finished = False
     app.populationSelected = False
     app.populationSelectorCircleX = (app.width/8)*4
+    app.radiusSelected = False
+    app.radiusSelectorCircleX = (app.width/8)*4
 
     #Image Citation: Image by <a href="https://pixabay.com/users/thedigitalartist-202249/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=4922384">Pete Linforth</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=4922384">Pixabay</a>
     app.vb = 'virusbackground.jpg'
@@ -162,6 +164,8 @@ def welcome_redrawAll(app):
     drawLabel('Immunity',app.width/2.05, (app.height/8.1)*3, size = 100,bold = True, fill = 'indigo',border = 'black')
     drawLabel('Simulator',app.width/2, (app.height/8)*4, size = 100,bold = True, fill = 'lightGreen')
     drawLabel('Simulator',app.width/1.95, (app.height/7.9)*4, size = 100,bold = True, fill = 'seaGreen', border = 'black')
+    drawLabel('Press the space bar to begin the simulation', app.width/2, (app.height/16)*14, size = 30, fill = 'white', bold = True)
+
     
 def drawBackground(app):
     imageWidth, imageHeight = getImageSize(app.vb)
@@ -187,35 +191,30 @@ def drawPlayAndPause(app):
 
 def getPathogenParameters(app):
     drawRect((app.width/20),(app.height/8)+50,(app.width/20)*18,(app.height/4)*3, fill = 'white')
-    selectPathogenContagiousLevel(app)
+    selectPathogenRadius(app)
     selectPopulationSize(app)
     selectReproductionNumber(app)
     selectStartingNumberOfInfected(app)
 
-def selectPathogenContagiousLevel(app):
+def selectPathogenRadius(app):
     drawLabel('Select a radius of infection for your pathogen: ',app.width/4, app.height/4,size = 20, fill = 'black')
     drawLine((app.width/8)*4, (app.height/4), (app.width/8)*7, app.height/4,fill = 'grey')
 
-    drawLabel('40',(app.width/8)*4, app.height/4+25, size = 20)
-    drawCircle((app.width/8)*4, app.height/4, 10, fill = 'red')
-    app.viralRadiusOptions[40]=[(app.width/8)*4, app.height/4+25]
+    drawLabel(str(app.viralRadius),((app.width/8)*4+(app.width/8)*7)/2, app.height/4+25, size = 20)
+    drawCircle(app.radiusSelectorCircleX, app.height/4, 10, fill = 'red')
+    # app.viralRadiusOptions[40]=[(app.width/8)*4, app.height/4+25]
 
-    drawLabel('100',(app.width/8)*7, app.height/4+25, size = 20)
-    drawCircle((app.width/8)*7, app.height/4, 10, fill = 'red')
-    app.viralRadiusOptions[100]=[(app.width/8)*4, app.height/4+25]
+    # drawLabel('100',(app.width/8)*7, app.height/4+25, size = 20)
+    # drawCircle((app.width/8)*7, app.height/4, 10, fill = 'red')
+    # app.viralRadiusOptions[100]=[(app.width/8)*4, app.height/4+25]
 
 
 def selectPopulationSize(app):
     drawLabel('Select a size for your population:',app.width/4, (app.height/8)*3,size = 25, fill = 'black')
     drawLine((app.width/8)*4, (app.height/8)*3, (app.width/8)*7, (app.height/8)*3,fill = 'grey')
     
-    drawLabel(str(app.populationSize),(app.width/8)*4, (app.height/8)*3+25, size = 20)
+    drawLabel(str(app.populationSize),((app.width/8)*4+(app.width/8)*7)/2, (app.height/8)*3+25, size = 20)
     drawCircle(app.populationSelectorCircleX, (app.height/8)*3, 10, fill = 'red')
-    # app.populationSizes[10] = [(app.width/8)*4, (app.height/8)*3]
-
-    # drawLabel('300',(app.width/8)*7, (app.height/8)*3+25, size = 20)
-    # drawCircle((app.width/8)*7, (app.height/8)*3, 10, fill = 'red')
-    # app.populationSizes[300] = [(app.width/8)*7, (app.height/8)*3]
 
 def selectReproductionNumber(app):
     drawLabel('Transmissability of your pathogen:',app.width/4, (app.height/2),size = 20, fill = 'black')
@@ -246,29 +245,70 @@ def parameters_redrawAll(app):
     getPathogenParameters(app)
     
 def parameters_onMousePress(app, mouseX, mouseY):
-    # for value in app.populationSizes:
-    #     if distance(mouseX,app.populationSizes[value][0], mouseY, app.populationSizes[value][1]) <= 10:
-    #         print(app.populationSize)
-    #         app.populationSize = value
     if distance(mouseX,app.populationSelectorCircleX, mouseY, (app.height/8)*3) <= 10:
         app.populationSelected = True
+    if distance(mouseX,app.radiusSelectorCircleX, mouseY, app.height/4) <= 10:
+        app.radiusSelected = True
 
-    for value in app.viralRadiusOptions:
-        if distance(mouseX, app.viralRadiusOptions[value][0], mouseY, app.viralRadiusOptions[value][1]) <= 10:
-            app.viralRadius = value
     for value in app.reproductionNumbers:
         if distance(mouseX, app.reproductionNumbers[value][0], mouseY, app.reproductionNumbers[value][1]) <= 10:
             app.reproductionNumber = value
 
+def parameters_onMouseRelease(app, mouseX, mouseY):
+    app.populationSelected = False
+    app.radiusSelected = False
+
+
 def parameters_onMouseDrag(app, mouseX, mouseY):
     if app.populationSelected:
         if ((app.width/8)*4) <= mouseX and mouseX <= ((app.height/8)*7+10):
-            if mouseX > app.populationSelectorCircleX:
-                app.populationSize += 10
-            elif mouseX < app.populationSelectorCircleX:
-                app.populationSize -=10
+            distanceDotFromStart = distance(mouseX,((app.width/8)*4),mouseY, (app.height/8)*3)
+            if distanceDotFromStart <= 20:
+                app.populationSize =10
+            elif distanceDotFromStart >= 20 and distanceDotFromStart <=40:
+                app.populationSize =20
+            elif distanceDotFromStart >= 40 and distanceDotFromStart <=80:
+                app.populationSize =40
+            elif distanceDotFromStart >= 80 and distanceDotFromStart <=100:
+                app.populationSize =80
+            elif distanceDotFromStart >= 100 and distanceDotFromStart <=120:
+                app.populationSize =100
+            elif distanceDotFromStart >= 120 and distanceDotFromStart <=140:
+                app.populationSize =120
+            elif distanceDotFromStart >= 140 and distanceDotFromStart <=180:
+                app.populationSize =140
+            elif distanceDotFromStart >= 180 and distanceDotFromStart <=200:
+                app.populationSize =160
+            elif distanceDotFromStart >= 200 and distanceDotFromStart <=220:
+                app.populationSize =180
+            elif distanceDotFromStart >= 220 and distanceDotFromStart <=240:
+                app.populationSize =200
+            elif distanceDotFromStart >= 240 and distanceDotFromStart <=280:
+                app.populationSize =220
+            elif distanceDotFromStart >= 280 and distanceDotFromStart <=300:
+                app.populationSize =240
+            elif distanceDotFromStart >= 300 and distanceDotFromStart <=320:
+                app.populationSize =280
+            elif distanceDotFromStart >= 320 and distanceDotFromStart <=340:
+                app.populationSize =300
+            elif distanceDotFromStart >= 340 and distanceDotFromStart <=380:
+                app.populationSize =320
             app.populationSelectorCircleX = mouseX
-
+    if app.radiusSelected:
+        if ((app.width/8)*4) <= mouseX and mouseX <= (app.width/8)*7:
+            distanceDotFromStart = distance(mouseX,((app.width/8)*4),mouseY, (app.height/4+25))
+            if distanceDotFromStart <= 50:
+                app.viralRadius = 10
+            elif distanceDotFromStart >= 50 and distanceDotFromStart <=100:
+                app.viralRadius =20
+            elif distanceDotFromStart >= 150 and distanceDotFromStart <=200:
+                app.viralRadius =40
+            elif distanceDotFromStart >= 250 and distanceDotFromStart <=300:
+                app.viralRadius =80
+            elif distanceDotFromStart >= 350 and distanceDotFromStart <=400:
+                app.viralRadius =100
+            app.radiusSelectorCircleX = mouseX
+            
 
 def drawConnections(app):
     for key in app.connectedInfections:
