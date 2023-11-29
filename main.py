@@ -155,13 +155,13 @@ def noHealthyInRange(app):
                     
 def welcome_redrawAll(app):
     drawBackground(app)
-    drawLabel("Welcome to", app.width/2, app.height/8, size = 50, align = 'center', fill = 'white')
-    drawLabel('Community',app.width/2, app.height/4, size = 90, align = 'right', bold = True, fill = 'lightGreen')
-    drawLabel('Community',app.width/1.95, app.height/4.1, size = 90,align = 'right',bold = True, fill = 'darkGreen')
-    drawLabel('Immunity',app.width/2, (app.height/8)*3, size = 100,align = 'left',bold = True, fill = 'lavender')
-    drawLabel('Immunity',app.width/2.05, (app.height/8.1)*3, size = 100,align = 'left',bold = True, fill = 'blueViolet')
-    drawLabel('Simulator',app.width/2, (app.height/8)*4, size = 100,align = 'right',bold = True, fill = 'lightGreen')
-    drawLabel('Simulator',app.width/1.95, (app.height/7.9)*4, size = 100,align = 'right',bold = True, fill = 'darkGreen')
+    # drawLabel("Welcome to", app.width/2, app.height/8, size = 50, align = 'center', fill = 'white')
+    drawLabel('Community',app.width/2, app.height/4, size = 90, font = 'grenze', bold = True, fill = 'lightGreen')
+    drawLabel('Community',app.width/1.95, app.height/4.1, size = 90,bold = True, fill = 'seaGreen',border = 'black')
+    drawLabel('Immunity',app.width/2, (app.height/8)*3, size = 100,bold = True, fill = 'lavender')
+    drawLabel('Immunity',app.width/2.05, (app.height/8.1)*3, size = 100,bold = True, fill = 'indigo',border = 'black')
+    drawLabel('Simulator',app.width/2, (app.height/8)*4, size = 100,bold = True, fill = 'lightGreen')
+    drawLabel('Simulator',app.width/1.95, (app.height/7.9)*4, size = 100,bold = True, fill = 'seaGreen', border = 'black')
     
 def drawBackground(app):
     imageWidth, imageHeight = getImageSize(app.vb)
@@ -186,6 +186,7 @@ def drawPlayAndPause(app):
     drawRect(app.pauseButtonX+2,app.pauseButtonY-10, 8, 20, fill = 'black')
 
 def getPathogenParameters(app):
+    drawRect((app.width/20),(app.height/8)+50,(app.width/20)*18,(app.height/4)*3, fill = 'white')
     selectPathogenContagiousLevel(app)
     selectPopulationSize(app)
     selectReproductionNumber(app)
