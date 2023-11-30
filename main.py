@@ -77,15 +77,13 @@ def main_redrawAll(app):
         drawPopulation(app)
         drawConnections(app)
         setActiveScreen('finished')
-        # drawPopulation(app)
-        # drawConnections(app)
-        # # drawFinishedLabels(app)
-        # drawGraph(app)
 
 def finished_redrawAll(app):
     drawBackground(app)
-    drawRect(100,100,800,800,fill = 'white')
+    drawRect(150,200,700,650,fill = 'white')
     drawGraph(app)
+    drawLabel('Your simulation is complete!',app.width/2,150, size = 30, fill = 'white')
+
 
 def drawMainLabels(app):
     drawBackground(app)
@@ -176,11 +174,11 @@ def drawGraph(app):
     drawLabel('0',280,600,size = 20)
     drawLabel(str(app.populationSize),280,300,size = 20)
     days = len(app.dictChangeOverTime)
-    incrementDays = (rectWidth)//days
+    incrementDays = (rectWidth)//(days-1)
     listInfected =[]
     listHealthy = []
     for i in range(1,days+1):
-        xVal = rectLeft + (incrementDays*i)
+        xVal = rectLeft + (incrementDays*(i-1))
         yValInfected = rectTop + (rectLeft - ((app.dictChangeOverTime[i] * rectHeight)/app.populationSize))
         yValHealthy = rectTop + (rectLeft - ((app.populationSize-app.dictChangeOverTime[i]) * rectHeight)/app.populationSize)
         drawCircle(xVal, yValInfected, 8, fill = 'red')
@@ -491,7 +489,5 @@ def distance(x1,x2,y1,y2):
 
 def main():
     runAppWithScreens(initialScreen = 'welcome', width = 1000, height = 1000)
-
-
 
 main()
