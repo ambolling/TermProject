@@ -67,7 +67,9 @@ class person():
 
 def main_redrawAll(app):
     if len(app.populationInfectedMembers) == 0:
-        generateInfectedMember(app)
+        generateInfectedMemberMiddle(app)
+        if len(app.populationInfectedMembers) == 0:
+            generateInfectedMemberRandom(app)
     drawMainLabels(app)
     drawPlayAndPause(app)
     if app.finished == False:
@@ -439,10 +441,12 @@ def drawPopulation(app):
         for val in app.populationImmuneMembers:
             drawCircle(val.xVal, val.yVal, personSize, fill = val.color, border = 'black')
 
-def generateInfectedMember(app):
+def generateInfectedMemberMiddle(app):
     boardCenterX = (app.populationRightBoundary+app.populationLeftBoundary)//2 
     boardCenterY = (app.populationTopBoundary+app.populationBottomBoundary)//2
-    #randomly infect someone in the center of the board 
+    #randomly infect someone in the center of the board
+    listOfPeopleInCenter = [] 
+    print(app.populationHealthyMembers)
     for i in range(app.initialInfectedCount):
         for person in app.populationHealthyMembers:
             xVal = person.xVal
@@ -451,7 +455,18 @@ def generateInfectedMember(app):
                 person.changeTypeColor('infected','red')
                 app.populationHealthyMembers.remove(person)
                 app.populationInfectedMembers.append(person)
+                listOfPeopleInCenter.append(person)
                 break
+
+def generateInfectedMemberRandom(app):
+    for i in range(app.initialInfectedCount):
+        for person in app.populationHealthyMembers:
+            xVal = person.xVal
+            yVal = person.yVal
+            person.changeTypeColor('infected','red')
+            app.populationHealthyMembers.remove(person)
+            app.populationInfectedMembers.append(person)
+            break
 
 def generateVaccinatedMember(app):
     boardCenterX = (app.populationRightBoundary+app.populationLeftBoundary)//2 
