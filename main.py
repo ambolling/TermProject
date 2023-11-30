@@ -41,6 +41,7 @@ def resetApp(app):
     app.dictChangeOverTime = dict()
     app.day = 1
     app.populationChange = []
+    app.initialVaccinatedCount = 0
 
     #Image Citation: Image by <a href="https://pixabay.com/users/thedigitalartist-202249/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=4922384">Pete Linforth</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=4922384">Pixabay</a>
     app.vb = 'virusbackground.jpg'
@@ -75,7 +76,16 @@ def main_redrawAll(app):
     else:
         drawPopulation(app)
         drawConnections(app)
-        drawFinishedLabels(app)
+        setActiveScreen('finished')
+        # drawPopulation(app)
+        # drawConnections(app)
+        # # drawFinishedLabels(app)
+        # drawGraph(app)
+
+def finished_redrawAll(app):
+    drawBackground(app)
+    drawRect(100,100,800,800,fill = 'white')
+    drawGraph(app)
 
 def drawMainLabels(app):
     drawBackground(app)
@@ -115,6 +125,7 @@ def main_onStep(app):
         app.populationChange.append(count)
         app.dictChangeOverTime[app.day] = count
         app.day += 1
+    print(app.dictChangeOverTime)
     if not app.paused and not isSimulationFinished(app):
         spreadInfection(app)
     if isSimulationFinished(app):
@@ -156,6 +167,36 @@ def isSimulationFinished(app):
         return True
     return False    
                     
+def drawGraph(app):
+    rectLeft = 300
+    rectTop = 300
+    rectWidth = 500
+    rectHeight = 300
+    drawRect(300,300,500,300, fill = 'white',border = 'black')
+    drawLabel('0',280,600,size = 20)
+    drawLabel(str(app.populationSize),280,300,size = 20)
+    days = len(app.dictChangeOverTime)
+    incrementDays = (rectWidth)//days
+    listInfected =[]
+    listHealthy = []
+    for i in range(1,days+1):
+        xVal = rectLeft + (incrementDays*i)
+        yValInfected = rectTop + (rectLeft - ((app.dictChangeOverTime[i] * rectHeight)/app.populationSize))
+        yValHealthy = rectTop + (rectLeft - ((app.populationSize-app.dictChangeOverTime[i]) * rectHeight)/app.populationSize)
+        drawCircle(xVal, yValInfected, 8, fill = 'red')
+        drawCircle(xVal, yValHealthy, 8, fill = 'green')
+        if i%2 != 0:
+            drawLabel(f'Day {i}', rectLeft +(incrementDays*i),620, size = 10) 
+        listInfected.append([xVal, yValInfected])
+        listHealthy.append([xVal, yValHealthy])
+    for j in range(len(listInfected)-1):
+        drawLine(listInfected[j][0],listInfected[j][1],listInfected[j+1][0],listInfected[j+1][1], fill='grey')
+    for k in range(len(listHealthy)-1):
+        drawLine(listHealthy[k][0],listHealthy[k][1],listHealthy[k+1][0],listHealthy[k+1][1], fill = 'grey')
+    drawLabel('Days',540, 650, size = 30)
+    drawLabel('Number of People',250, 450, size = 30, rotateAngle=270)
+
+
 def welcome_redrawAll(app):
     drawBackground(app)
     # drawLabel("Welcome to", app.width/2, app.height/8, size = 50, align = 'center', fill = 'white')
@@ -414,6 +455,18 @@ def generateInfectedMember(app):
                 app.populationInfectedMembers.append(person)
                 break
 
+def generateVaccinatedMember(app):
+    boardCenterX = (app.populationRightBoundary+app.populationLeftBoundary)//2 
+    boardCenterY = (app.populationTopBoundary+app.populationBottomBoundary)//2
+    for i in range(app.initialVaccinatedCount):
+        for person in app.populationHealthyMembers:
+            xVal = person.xVal
+            yVal = person.yVal
+            if distance(xVal, boardCenterX, yVal, boardCenterY) <= 300:
+                person.changeTypeColor('immune','lightBlue')
+                app.populationHealthyMembers.remove(person)
+                app.populationInfectedMembers.append(person)
+                break
     
 def spreadInfection(app):
     for infectedPerson in app.populationInfectedMembers:
