@@ -95,7 +95,7 @@ def drawMainLabels(app):
     drawLabel(' = Healthy', 100, 250, align = 'center', size = 20)
     drawCircle(40,280, 10, fill = 'red')
     drawLabel(' = Infected', 100, 280, align = 'center', size = 20)
-    drawCircle(40,310, 10, fill = 'lightBlue')
+    drawCircle(40,310, 10, fill = 'lightBlue', border = 'black')
     drawLabel(' = Immune', 100, 310, align = 'center', size = 20)
     drawLine(app.populationLeftBoundary-10, app.populationTopBoundary-10, app.populationRightBoundary+10, app.populationTopBoundary-10)
     drawLine(app.populationLeftBoundary-10, app.populationTopBoundary-10, app.populationLeftBoundary-10, app.populationBottomBoundary+10)
@@ -179,7 +179,6 @@ def drawGraph(app):
     incrementDays = (rectWidth)//(days-1)
     listInfected =[]
     listHealthy = []
-    print(days+1)
     for i in range(1,days+1):
         xVal = rectLeft + (incrementDays*(i-1))
         yValInfected = rectTop + (rectLeft - ((app.dictChangeOverTime[i] * rectHeight)/app.populationSize))
@@ -197,16 +196,15 @@ def drawGraph(app):
     drawLabel('Days',540, 675, size = 30)
     drawLabel('Number of People',200, 450, size = 30, rotateAngle=270)
 
-
 def welcome_redrawAll(app):
     drawBackground(app)
     # drawLabel("Welcome to", app.width/2, app.height/8, size = 50, align = 'center', fill = 'white')
-    drawLabel('Community',app.width/2, app.height/4, size = 90, font = 'grenze', bold = True, fill = 'lightGreen')
-    drawLabel('Community',app.width/1.95, app.height/4.1, size = 90,bold = True, fill = 'seaGreen',border = 'black')
-    drawLabel('Immunity',app.width/2, (app.height/8)*3, size = 100,bold = True, fill = 'lavender')
-    drawLabel('Immunity',app.width/2.05, (app.height/8.1)*3, size = 100,bold = True, fill = 'indigo',border = 'black')
-    drawLabel('Simulator',app.width/2, (app.height/8)*4, size = 100,bold = True, fill = 'lightGreen')
-    drawLabel('Simulator',app.width/1.95, (app.height/7.9)*4, size = 100,bold = True, fill = 'seaGreen', border = 'black')
+    drawLabel('Community',app.width/2, app.height/4, size = 110, bold = True, fill = 'lightGreen')
+    drawLabel('Community',app.width/2.05, app.height/4, size = 110, bold = True, fill = 'seaGreen',border = 'black')
+    drawLabel('Immunity',app.width/2, (app.height/8)*3, size = 110,bold = True, fill = 'lavender')
+    drawLabel('Immunity',app.width/2.05, (app.height/8.1)*3, size = 110,bold = True, fill = 'indigo',border = 'black')
+    drawLabel('Simulator',app.width/2, (app.height/8)*4, size = 110,bold = True, fill = 'lightGreen')
+    drawLabel('Simulator',app.width/2.05, (app.height/8.1)*4, size = 110,bold = True, fill = 'seaGreen', border = 'black')
     drawLabel('Press the space bar to begin the simulation', app.width/2, (app.height/16)*14, size = 30, fill = 'white', bold = True)
     
 def drawBackground(app):
@@ -297,10 +295,9 @@ def parameters_onMouseRelease(app, mouseX, mouseY):
     app.reproductionNumberSelected = False
     app.infectedSelected = False
 
-
 def parameters_onMouseDrag(app, mouseX, mouseY):
     if app.populationSelected:
-        if ((app.width/8)*4) <= mouseX and mouseX <= ((app.height/8)*7+10):
+        if ((app.width/8)*4) <= mouseX and mouseX <= ((app.height/8)*7):
             distanceDotFromStart = distance(mouseX,((app.width/8)*4),mouseY, (app.height/8)*3)
             if distanceDotFromStart <= 20:
                 app.populationSize =10
@@ -330,7 +327,7 @@ def parameters_onMouseDrag(app, mouseX, mouseY):
                 app.populationSize =280
             elif distanceDotFromStart >= 320 and distanceDotFromStart <=340:
                 app.populationSize =300
-            elif distanceDotFromStart >= 340 and distanceDotFromStart <=380:
+            elif distanceDotFromStart >= 340 and distanceDotFromStart <=400:
                 app.populationSize =320
             app.populationSelectorCircleX = mouseX
     if app.radiusSelected:
