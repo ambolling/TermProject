@@ -82,10 +82,10 @@ def main_redrawAll(app):
 
 def finished_redrawAll(app):
     drawBackground(app)
-    drawRect(150,200,700,650,fill = 'white')
+    drawRect(150,250,700,450,fill = 'white')
     drawGraph(app)
-    drawLabel('Your simulation is complete!',app.width/2,150, size = 30, fill = 'white')
-
+    drawLabel('Your simulation is complete!',app.width/2,100, size = 50, fill = 'white', bold = True)
+    drawLabel(f'Your simulation lasted {len(app.dictChangeOverTime)} days',app.width/2,200, size = 25, fill = 'white', bold = True)
 
 def drawMainLabels(app):
     drawBackground(app)
@@ -125,7 +125,7 @@ def main_onStep(app):
         app.populationChange.append(count)
         app.dictChangeOverTime[app.day] = count
         app.day += 1
-    print(app.dictChangeOverTime)
+
     if not app.paused and not isSimulationFinished(app):
         spreadInfection(app)
     if isSimulationFinished(app):
@@ -173,28 +173,29 @@ def drawGraph(app):
     rectWidth = 500
     rectHeight = 300
     drawRect(300,300,500,300, fill = 'white',border = 'black')
-    drawLabel('0',280,600,size = 20)
-    drawLabel(str(app.populationSize),280,300,size = 20)
+    drawLabel('0',260,600,size = 20)
+    drawLabel(str(app.populationSize),260,300,size = 20)
     days = len(app.dictChangeOverTime)
     incrementDays = (rectWidth)//(days-1)
     listInfected =[]
     listHealthy = []
+    print(days+1)
     for i in range(1,days+1):
         xVal = rectLeft + (incrementDays*(i-1))
         yValInfected = rectTop + (rectLeft - ((app.dictChangeOverTime[i] * rectHeight)/app.populationSize))
         yValHealthy = rectTop + (rectLeft - ((app.populationSize-app.dictChangeOverTime[i]) * rectHeight)/app.populationSize)
         drawCircle(xVal, yValInfected, 8, fill = 'red')
         drawCircle(xVal, yValHealthy, 8, fill = 'green')
-        if i%2 != 0:
-            drawLabel(f'Day {i}', rectLeft +(incrementDays*i),620, size = 10) 
+        if i%2 != 0 and i != days:
+            drawLabel(f'Day {i}', rectLeft +(incrementDays*i),640, size = 12) 
         listInfected.append([xVal, yValInfected])
         listHealthy.append([xVal, yValHealthy])
     for j in range(len(listInfected)-1):
         drawLine(listInfected[j][0],listInfected[j][1],listInfected[j+1][0],listInfected[j+1][1], fill='grey')
     for k in range(len(listHealthy)-1):
         drawLine(listHealthy[k][0],listHealthy[k][1],listHealthy[k+1][0],listHealthy[k+1][1], fill = 'grey')
-    drawLabel('Days',540, 650, size = 30)
-    drawLabel('Number of People',250, 450, size = 30, rotateAngle=270)
+    drawLabel('Days',540, 675, size = 30)
+    drawLabel('Number of People',200, 450, size = 30, rotateAngle=270)
 
 
 def welcome_redrawAll(app):
@@ -446,7 +447,6 @@ def generateInfectedMemberMiddle(app):
     boardCenterY = (app.populationTopBoundary+app.populationBottomBoundary)//2
     #randomly infect someone in the center of the board
     listOfPeopleInCenter = [] 
-    print(app.populationHealthyMembers)
     for i in range(app.initialInfectedCount):
         for person in app.populationHealthyMembers:
             xVal = person.xVal
