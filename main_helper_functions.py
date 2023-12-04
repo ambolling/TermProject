@@ -124,8 +124,7 @@ def generatePopulation(app):
 
 def generateMutation(app):
     possiblyParamsAndValues = {'app.viralRadius':[10,20,40,80,100],'app.reproductionNumber':[10,20,40,80,100]}
-    # chosenParam = rand.choice(list(possiblyParamsAndValues.keys()))
-    chosenParam = 'app.viralRadius'
+    chosenParam = rand.choice(list(possiblyParamsAndValues.keys()))
     if chosenParam == 'app.viralRadius':
         possiblyParamsAndValues[chosenParam].remove(app.viralRadius)
         value = rand.choice(possiblyParamsAndValues[chosenParam]) 
@@ -137,6 +136,15 @@ def generateMutation(app):
         app.reproductionNumber = value 
         app.mutatedParameter = 'reproductionNum'
 
+def drawMutationButton(app):
+    drawCircle(app.mutationX, app.mutationY, app.mutationRadius, fill = 'red')
+    drawLabel('MUTATE!', app.mutationX, app.mutationY, size = 16, fill = 'white', bold = True)
+
+def drawMutationLabels(app):
+    if app.mutatedParameter == 'radius':
+        drawLabel(f"{app.virusName} has mutated! The viral radius has changed to {app.viralRadius}",450, 900, size = 20, fill = 'red', bold = True)
+    else:
+        drawLabel(f"{app.virusName} has mutated! The percent of transmission has changed to {app.reproductionNumber}",450, 900, size = 20, fill = 'red', bold = True)
 
 def isSimulationFinished(app):
     count = 0
