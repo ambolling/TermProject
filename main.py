@@ -26,6 +26,9 @@ def resetApp(app):
     app.playButtonPoints = [(app.populationLeftBoundary+app.populationRightBoundary)/2-40,app.populationTopBoundary-60,
                             (app.populationLeftBoundary+app.populationRightBoundary)/2-40,app.populationTopBoundary-40,
                             (app.populationLeftBoundary+app.populationRightBoundary)/2-15,app.populationTopBoundary-50]
+    app.mutationX = 900
+    app.mutationY = 900
+    app.mutationRadius = 50
     app.stepsPerSecond = .5
     app.connectedInfections = dict()
     app.viralRadius = 10
@@ -52,6 +55,8 @@ def resetApp(app):
     app.enteringName = False
     app.virusName = ''
     app.virusNameWarning = False
+    app.mutate = False
+    app.mutatedParameter = None
 
     #Image Citation: Image by <a href="https://pixabay.com/users/thedigitalartist-202249/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=4922384">Pete Linforth</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=4922384">Pixabay</a>
     app.vb = 'virusbackground.jpg'
@@ -89,7 +94,6 @@ def virusName_redrawAll(app):
         drawLabel('You must enter a virus name!', app.width/2, (app.height/8)*6, size = 45, fill='red', bold = True)
 
 def virusName_onKeyPress(app, key):
-    print(key, app.enteringName)
     if key == 'space':
         if len(app.virusName) != 0:
             setActiveScreen('parameters')
@@ -103,7 +107,6 @@ def virusName_onKeyPress(app, key):
         elif key != 'enter': 
             if len(app.virusName) < 10:
                 app.virusName+=key
-    print(key,app.enteringName)
         
 #### Parameters screen functions 
 
@@ -239,13 +242,25 @@ def main_redrawAll(app):
             generateInfectedMemberRandom(app)
     drawMainLabels(app)
     drawPlayAndPause(app)
+    drawMutationButton(app)
     if app.finished == False:
         drawPopulation(app)
         drawConnections(app)
+        if app.mutate == True:
+            drawMutationLabels(app)
     else:
         drawPopulation(app)
         drawConnections(app)
         setActiveScreen('finished')
+
+def drawMutationButton(app):
+    drawCircle(app.mutationX, app.mutationY, app.mutationRadius, fill = 'brown')
+
+def drawMutationLabels(app):
+    if app.mutatedParameter == 'radius':
+        drawLabel(f"{app.virusName} has mutated! The viral radius has changed to {app.viralRadius}",550, 900, size = 20, fill = 'red', bold = True)
+    else:
+        drawLabel(f"{app.virusName} has mutated! The percent of transmission has changed to {app.reproductionNumber}",550, 900, size = 20, fill = 'red', bold = True)
 
 def main_onStep(app):
     if not app.paused:
@@ -277,6 +292,10 @@ def main_onMousePress(app, mouseX, mouseY):
         app.paused = True
     if distance(mouseX, app.playButtonX, mouseY, app.playButtonY) <= 20:
         app.paused = False 
+    if distance(mouseX, app.mutationX, mouseY, app.mutationY) <= app.mutationRadius:
+        app.mutate = True
+        generateMutation(app)
+        app.paused = True
 
 def main_onMouseDrag(app, mouseX, mouseY):
     for person in app.populationHealthyMembers:
@@ -297,8 +316,10 @@ def finished_redrawAll(app):
     drawRect(150,250,700,450,fill = 'white')
     drawGraph(app)
     drawLabel('Your simulation is complete!',app.width/2,100, size = 50, fill = 'white', bold = True)
-    drawLabel(f'You infected {len(app.populationInfectedMembers)} people with {app.virusName} across {len(app.dictChangeOverTimeInfected)} days',app.width/2,200, size = 25, fill = 'white', bold = True)
-
+    if len(app.populationInfectedMembers) <= 1:
+        drawLabel(f'You infected {len(app.populationInfectedMembers)} person with {app.virusName} across {len(app.dictChangeOverTimeInfected)} days',app.width/2,200, size = 25, fill = 'white', bold = True)
+    else:
+        drawLabel(f'You infected {len(app.populationInfectedMembers)} people with {app.virusName} across {len(app.dictChangeOverTimeInfected)} days',app.width/2,200, size = 25, fill = 'white', bold = True)
 
 #### Universal functions used in all screens
 
