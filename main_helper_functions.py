@@ -123,28 +123,18 @@ def generatePopulation(app):
         app.populationAllMembers.append(newPerson)
 
 def generateMutation(app):
-    print(f'original radius {app.viralRadius}')
-    print(f'original reproNum {app.reproductionNumber}')
     possiblyParamsAndValues = {'app.viralRadius':[10,20,40,80,100],'app.reproductionNumber':[10,20,40,80,100]}
     # chosenParam = rand.choice(list(possiblyParamsAndValues.keys()))
     chosenParam = 'app.viralRadius'
-    print(chosenParam)
     if chosenParam == 'app.viralRadius':
-        print(possiblyParamsAndValues[chosenParam])
         possiblyParamsAndValues[chosenParam].remove(app.viralRadius)
-        print(possiblyParamsAndValues[chosenParam])
         value = rand.choice(possiblyParamsAndValues[chosenParam]) 
-        print(value)
         app.viralRadius = value
         app.mutatedParameter = 'radius'
     else:
-        print(possiblyParamsAndValues[chosenParam])
         possiblyParamsAndValues[chosenParam].remove(app.reproductionNumber)
-        print(possiblyParamsAndValues[chosenParam])
         value = rand.choice(possiblyParamsAndValues[chosenParam]) 
-        print(value)
         app.reproductionNumber = value 
-        print(f'new reproNum {app.reproductionNumber}')
         app.mutatedParameter = 'reproductionNum'
 
 

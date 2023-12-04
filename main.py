@@ -254,13 +254,14 @@ def main_redrawAll(app):
         setActiveScreen('finished')
 
 def drawMutationButton(app):
-    drawCircle(app.mutationX, app.mutationY, app.mutationRadius, fill = 'brown')
+    drawCircle(app.mutationX, app.mutationY, app.mutationRadius, fill = 'red')
+    drawLabel('MUTATE!', app.mutationX, app.mutationY, size = 16, fill = 'white', bold = True)
 
 def drawMutationLabels(app):
     if app.mutatedParameter == 'radius':
-        drawLabel(f"{app.virusName} has mutated! The viral radius has changed to {app.viralRadius}",550, 900, size = 20, fill = 'red', bold = True)
+        drawLabel(f"{app.virusName} has mutated! The viral radius has changed to {app.viralRadius}",450, 900, size = 25, fill = 'red', bold = True)
     else:
-        drawLabel(f"{app.virusName} has mutated! The percent of transmission has changed to {app.reproductionNumber}",550, 900, size = 20, fill = 'red', bold = True)
+        drawLabel(f"{app.virusName} has mutated! The percent of transmission has changed to {app.reproductionNumber}",450, 900, size = 25, fill = 'red', bold = True)
 
 def main_onStep(app):
     if not app.paused:
