@@ -54,6 +54,7 @@ def resetApp(app):
     app.vb = 'virusbackground.jpg'
 
 def main_redrawAll(app):
+    drawBackground(app)
     if len(app.populationInfectedMembers) == 0:
         generateInfectedMemberMiddle(app)
         generateVaccinatedMember(app)
@@ -75,36 +76,6 @@ def finished_redrawAll(app):
     drawGraph(app)
     drawLabel('Your simulation is complete!',app.width/2,100, size = 50, fill = 'white', bold = True)
     drawLabel(f'Your simulation lasted {len(app.dictChangeOverTimeInfected)} days',app.width/2,200, size = 25, fill = 'white', bold = True)
-
-def drawMainLabels(app):
-    drawBackground(app)
-    drawRect(20, 200, 215, (app.height/8)+10, fill = 'lavender')
-    drawLabel('Key',(20+215)/2, 210,size = 20)
-    drawCircle(40,250, 10, fill = 'seaGreen')
-    drawLabel(' = Healthy', 100, 250, align = 'center', size = 20)
-    drawCircle(40,280, 10, fill = 'red')
-    drawLabel(' = Infected', 100, 280, align = 'center', size = 20)
-    drawCircle(40,310, 10, fill = 'lightBlue', border = 'black')
-    drawLabel(' = Immune', 100, 310, align = 'center', size = 20)
-    drawLine(app.populationLeftBoundary-10, app.populationTopBoundary-10, app.populationRightBoundary+10, app.populationTopBoundary-10)
-    drawLine(app.populationLeftBoundary-10, app.populationTopBoundary-10, app.populationLeftBoundary-10, app.populationBottomBoundary+10)
-    drawLine(app.populationLeftBoundary-10, app.populationBottomBoundary+10, app.populationRightBoundary+10, app.populationBottomBoundary+10)
-    drawLine(app.populationRightBoundary+10, app.populationBottomBoundary+10, app.populationRightBoundary+10, app.populationTopBoundary-10)
-    drawRect(app.populationLeftBoundary-10,app.populationTopBoundary-10, (app.populationRightBoundary+10)-(app.populationLeftBoundary-10),abs((app.populationTopBoundary-10)-(app.populationBottomBoundary+10)), fill = 'white')
-    drawLabel("Community Immunity Simulator", app.width/2, app.height/16, size = 50, bold = True, fill = 'white')
-    drawLabel('Press r key to reset simulator',(app.width/4)*3+60, (app.height/18)*2, size = 20,bold = True, fill = 'white' )
-    drawLabel('Click on a person or hold down and drag to immunize',(app.width/4)*1+60, (app.height/18)*2, size = 23,bold = True, fill = 'black' )
-    drawRect(20, 400, 215, 400, fill = 'lavender')
-    drawLabel('Size of Population', app.width/8, 425, size = 20)
-    drawLabel(app.populationSize, (app.width/8), 450, size = 20)
-    drawLabel('Radius of infection', (app.width/8), 500, size = 20)
-    drawLabel(app.viralRadius, (app.width/8), 525, size = 20)
-    drawLabel('Percentage Immune', (app.width/8), 575, size = 20)
-    drawLabel(calculatePercentageImmune(app), (app.width/8), 600, size = 20)
-    drawLabel('Percentage Infected', (app.width/8), 650, size = 20)
-    drawLabel(calculatePercentageInfected(app), (app.width/8), 675, size = 20)
-    drawLabel('Percentage Healthy', (app.width/8), 725, size = 20)
-    drawLabel(calculatePercentageHealthy(app), (app.width/8),750, size = 20)
 
 def main_onStep(app):
     if not app.paused:
