@@ -49,77 +49,14 @@ def resetApp(app):
     app.initialVaccinatedCount = 0
     app.immuneSelectorCircleX = app.width/2
     app.immuneSelected = False
+    app.enteringName = False
+    app.virusName = ''
+    app.virusNameWarning = False
 
     #Image Citation: Image by <a href="https://pixabay.com/users/thedigitalartist-202249/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=4922384">Pete Linforth</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=4922384">Pixabay</a>
     app.vb = 'virusbackground.jpg'
 
-def main_redrawAll(app):
-    drawBackground(app)
-    if len(app.populationInfectedMembers) == 0:
-        generateInfectedMemberMiddle(app)
-        generateVaccinatedMember(app)
-        if len(app.populationInfectedMembers) == 0:
-            generateInfectedMemberRandom(app)
-    drawMainLabels(app)
-    drawPlayAndPause(app)
-    if app.finished == False:
-        drawPopulation(app)
-        drawConnections(app)
-    else:
-        drawPopulation(app)
-        drawConnections(app)
-        setActiveScreen('finished')
-
-def finished_redrawAll(app):
-    drawBackground(app)
-    drawRect(150,250,700,450,fill = 'white')
-    drawGraph(app)
-    drawLabel('Your simulation is complete!',app.width/2,100, size = 50, fill = 'white', bold = True)
-    drawLabel(f'Your simulation lasted {len(app.dictChangeOverTimeInfected)} days',app.width/2,200, size = 25, fill = 'white', bold = True)
-
-def main_onStep(app):
-    if not app.paused:
-        countInfected = 0
-        countHealthy = 0
-        for person in app.populationAllMembers:
-            if person.type == 'infected':
-                countInfected +=1
-        for person in app.populationAllMembers:
-            if person.type == 'healthy':
-                countHealthy +=1
-        app.populationChange.append(countInfected)
-        app.dictChangeOverTimeInfected[app.day] = countInfected
-        app.dictChangeOverTimeHealthy[app.day] = countHealthy
-        app.day += 1
-
-    if not app.paused and not isSimulationFinished(app):
-        spreadInfection(app)
-    if isSimulationFinished(app):
-        app.paused = True
-        app.finished = True
-
-def main_onMousePress(app, mouseX, mouseY):
-    for person in app.populationHealthyMembers:
-        if distance(person.xVal, mouseX, person.yVal, mouseY) <= 10:
-            person.changeTypeColor('immune','lightBlue')
-            app.populationHealthyMembers.remove(person)
-            app.populationImmuneMembers.append(person)
-    if distance(mouseX, app.pauseButtonX, mouseY, app.pauseButtonY) <= 20:
-        app.paused = True
-    if distance(mouseX, app.playButtonX, mouseY, app.playButtonY) <= 20:
-        app.paused = False 
-
-def main_onMouseDrag(app, mouseX, mouseY):
-    for person in app.populationHealthyMembers:
-        if distance(person.xVal, mouseX, person.yVal, mouseY) <= 10:
-            person.changeTypeColor('immune','lightBlue')
-            app.populationHealthyMembers.remove(person)
-            app.populationImmuneMembers.append(person)
-
-def main_onKeyPress(app, key):
-    if key == 'r':
-        resetApp(app)
-        setActiveScreen('parameters')
+##### Welcome screen functions
 
 def welcome_redrawAll(app):
     drawBackground(app)
@@ -132,18 +69,44 @@ def welcome_redrawAll(app):
     drawLabel('Simulator',app.width/2.05, (app.height/8.1)*4, size = 110,bold = True, fill = 'seaGreen', border = 'black')
     drawLabel('Press the space bar to begin the simulation', app.width/2, (app.height/16)*14, size = 30, fill = 'white', bold = True)
     
-def drawBackground(app):
-    imageWidth, imageHeight = getImageSize(app.vb)
-    drawImage(app.vb, app.width/2, app.height/2, align='center',
-              width=imageWidth, height=imageHeight)
-
-def openImage(fileName):
-        return Image.open(os.path.join(pathlib.Path(__file__).parent,fileName))
-
 def welcome_onKeyPress(app, key):
     if key == 'space':
-        setActiveScreen('parameters')
-    
+        setActiveScreen('virusName')
+
+#### VirusName screen functions
+
+def virusName_redrawAll(app):
+    drawBackground(app)
+    drawRect((app.width/20),(app.height/8)+50,(app.width/20)*18,(app.height/4)+100, fill = 'white')
+    drawLabel("Welcome to Community Immunity Simlutor", app.width/2, app.height/8, size = 45, fill = 'white', bold= True)
+    drawLabel("Name your virus!", app.width/2,(app.height/8)*2-40, size = 30, fill = 'black', bold = True)
+    drawLabel("Press Enter to begin typing your virus name",app.width/2,(app.height/8)*2+50, size = 25, fill = 'black')
+    drawLabel("Type characters to add to your virus name.",app.width/2,(app.height/8)*2+100, size = 25, fill = 'black')
+    drawLabel('Press backspace to remove from your virus name',app.width/2,(app.height/8)*2+150, size = 25, fill = 'black')
+    drawLabel("Press Enter again when finished typing your virus name",app.width/2,(app.height/8)*2+200, size = 25, fill = 'black')
+    drawLabel(f'Virus name: {app.virusName}', app.width/2,(app.height/8)*6-100, size = 45, fill = 'white', bold = True)
+    if app.virusNameWarning:
+        drawLabel('You must enter a virus name!', app.width/2, (app.height/8)*6, size = 45, fill='red', bold = True)
+
+def virusName_onKeyPress(app, key):
+    print(key, app.enteringName)
+    if key == 'space':
+        if len(app.virusName) != 0:
+            setActiveScreen('parameters')
+        else:
+            app.virusNameWarning = True
+    if key == 'enter':
+        app.enteringName = not app.enteringName
+    if app.enteringName:
+        if key == 'backspace':
+            app.virusName = app.virusName[:-1]
+        elif key != 'enter': 
+            if len(app.virusName) < 10:
+                app.virusName+=key
+    print(key,app.enteringName)
+        
+#### Parameters screen functions 
+
 def parameters_onKeyPress(app, key):
     if key == 'space':
         setActiveScreen('main')
@@ -151,7 +114,6 @@ def parameters_onKeyPress(app, key):
 def parameters_redrawAll(app):
     drawBackground(app)
     drawLabel("Welcome to Community Immunity Simlutor", app.width/2, app.height/8, size = 45, fill = 'white', bold= True)
-    drawLabel('Select your parameters', app.width/2, (app.height/16)*3, size = 20, fill = 'white', bold = True)
     drawLabel('Press the space bar to begin the simulation', app.width/2, (app.height/16)*14, size = 30, fill = 'white', bold = True)
     getPathogenParameters(app)
     
@@ -266,8 +228,92 @@ def parameters_onMouseDrag(app, mouseX, mouseY):
                 app.initialVaccinatedCount = 5
             app.immuneSelectorCircleX = mouseX
 
+#### Main screen functions
+
+def main_redrawAll(app):
+    drawBackground(app)
+    if len(app.populationInfectedMembers) == 0:
+        generateInfectedMemberMiddle(app)
+        generateVaccinatedMember(app)
+        if len(app.populationInfectedMembers) == 0:
+            generateInfectedMemberRandom(app)
+    drawMainLabels(app)
+    drawPlayAndPause(app)
+    if app.finished == False:
+        drawPopulation(app)
+        drawConnections(app)
+    else:
+        drawPopulation(app)
+        drawConnections(app)
+        setActiveScreen('finished')
+
+def main_onStep(app):
+    if not app.paused:
+        countInfected = 0
+        countHealthy = 0
+        for person in app.populationAllMembers:
+            if person.type == 'infected':
+                countInfected +=1
+        for person in app.populationAllMembers:
+            if person.type == 'healthy':
+                countHealthy +=1
+        app.populationChange.append(countInfected)
+        app.dictChangeOverTimeInfected[app.day] = countInfected
+        app.dictChangeOverTimeHealthy[app.day] = countHealthy
+        app.day += 1
+    if not app.paused and not isSimulationFinished(app):
+        spreadInfection(app)
+    if isSimulationFinished(app):
+        app.paused = True
+        app.finished = True
+
+def main_onMousePress(app, mouseX, mouseY):
+    for person in app.populationHealthyMembers:
+        if distance(person.xVal, mouseX, person.yVal, mouseY) <= 10:
+            person.changeTypeColor('immune','lightBlue')
+            app.populationHealthyMembers.remove(person)
+            app.populationImmuneMembers.append(person)
+    if distance(mouseX, app.pauseButtonX, mouseY, app.pauseButtonY) <= 20:
+        app.paused = True
+    if distance(mouseX, app.playButtonX, mouseY, app.playButtonY) <= 20:
+        app.paused = False 
+
+def main_onMouseDrag(app, mouseX, mouseY):
+    for person in app.populationHealthyMembers:
+        if distance(person.xVal, mouseX, person.yVal, mouseY) <= 10:
+            person.changeTypeColor('immune','lightBlue')
+            app.populationHealthyMembers.remove(person)
+            app.populationImmuneMembers.append(person)
+
+def main_onKeyPress(app, key):
+    if key == 'r':
+        resetApp(app)
+        setActiveScreen('parameters')
+
+#### Finished screen functions
+
+def finished_redrawAll(app):
+    drawBackground(app)
+    drawRect(150,250,700,450,fill = 'white')
+    drawGraph(app)
+    drawLabel('Your simulation is complete!',app.width/2,100, size = 50, fill = 'white', bold = True)
+    drawLabel(f'You infected {len(app.populationInfectedMembers)} people with {app.virusName} across {len(app.dictChangeOverTimeInfected)} days',app.width/2,200, size = 25, fill = 'white', bold = True)
+
+
+#### Universal functions used in all screens
+
+def drawBackground(app):
+    imageWidth, imageHeight = getImageSize(app.vb)
+    drawImage(app.vb, app.width/2, app.height/2, align='center',
+              width=imageWidth, height=imageHeight)
+
+def openImage(fileName):
+        return Image.open(os.path.join(pathlib.Path(__file__).parent,fileName))    
+
 def distance(x1,x2,y1,y2):
     return ((x2-x1)**2+(y2-y1)**2)**.5
+
+#### Call main
 
 def main():
     runAppWithScreens(initialScreen = 'welcome', width = 1000, height = 1000)
