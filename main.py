@@ -26,6 +26,9 @@ def resetApp(app):
     app.playButtonPoints = [(app.populationLeftBoundary+app.populationRightBoundary)/2-40,app.populationTopBoundary-60,
                             (app.populationLeftBoundary+app.populationRightBoundary)/2-40,app.populationTopBoundary-40,
                             (app.populationLeftBoundary+app.populationRightBoundary)/2-15,app.populationTopBoundary-50]
+    app.mutationX = 900
+    app.mutationY = 900
+    app.mutationRadius = 50
     app.stepsPerSecond = .5
     app.connectedInfections = dict()
     app.viralRadius = 10
@@ -49,106 +52,16 @@ def resetApp(app):
     app.initialVaccinatedCount = 0
     app.immuneSelectorCircleX = app.width/2
     app.immuneSelected = False
+    app.enteringName = False
+    app.virusName = ''
+    app.virusNameWarning = False
+    app.mutate = False
+    app.mutatedParameter = None
 
     #Image Citation: Image by <a href="https://pixabay.com/users/thedigitalartist-202249/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=4922384">Pete Linforth</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=4922384">Pixabay</a>
     app.vb = 'virusbackground.jpg'
 
-def main_redrawAll(app):
-    if len(app.populationInfectedMembers) == 0:
-        generateInfectedMemberMiddle(app)
-        generateVaccinatedMember(app)
-        if len(app.populationInfectedMembers) == 0:
-            generateInfectedMemberRandom(app)
-    drawMainLabels(app)
-    drawPlayAndPause(app)
-    if app.finished == False:
-        drawPopulation(app)
-        drawConnections(app)
-    else:
-        drawPopulation(app)
-        drawConnections(app)
-        setActiveScreen('finished')
-
-def finished_redrawAll(app):
-    drawBackground(app)
-    drawRect(150,250,700,450,fill = 'white')
-    drawGraph(app)
-    drawLabel('Your simulation is complete!',app.width/2,100, size = 50, fill = 'white', bold = True)
-    drawLabel(f'Your simulation lasted {len(app.dictChangeOverTimeInfected)} days',app.width/2,200, size = 25, fill = 'white', bold = True)
-
-def drawMainLabels(app):
-    drawBackground(app)
-    drawRect(20, 200, 215, (app.height/8)+10, fill = 'lavender')
-    drawLabel('Key',(20+215)/2, 210,size = 20)
-    drawCircle(40,250, 10, fill = 'seaGreen')
-    drawLabel(' = Healthy', 100, 250, align = 'center', size = 20)
-    drawCircle(40,280, 10, fill = 'red')
-    drawLabel(' = Infected', 100, 280, align = 'center', size = 20)
-    drawCircle(40,310, 10, fill = 'lightBlue', border = 'black')
-    drawLabel(' = Immune', 100, 310, align = 'center', size = 20)
-    drawLine(app.populationLeftBoundary-10, app.populationTopBoundary-10, app.populationRightBoundary+10, app.populationTopBoundary-10)
-    drawLine(app.populationLeftBoundary-10, app.populationTopBoundary-10, app.populationLeftBoundary-10, app.populationBottomBoundary+10)
-    drawLine(app.populationLeftBoundary-10, app.populationBottomBoundary+10, app.populationRightBoundary+10, app.populationBottomBoundary+10)
-    drawLine(app.populationRightBoundary+10, app.populationBottomBoundary+10, app.populationRightBoundary+10, app.populationTopBoundary-10)
-    drawRect(app.populationLeftBoundary-10,app.populationTopBoundary-10, (app.populationRightBoundary+10)-(app.populationLeftBoundary-10),abs((app.populationTopBoundary-10)-(app.populationBottomBoundary+10)), fill = 'white')
-    drawLabel("Community Immunity Simulator", app.width/2, app.height/16, size = 50, bold = True, fill = 'white')
-    drawLabel('Press r key to reset simulator',(app.width/4)*3+60, (app.height/18)*2, size = 20,bold = True, fill = 'white' )
-    drawLabel('Click on a person or hold down and drag to immunize',(app.width/4)*1+60, (app.height/18)*2, size = 23,bold = True, fill = 'black' )
-    drawRect(20, 400, 215, 400, fill = 'lavender')
-    drawLabel('Size of Population', app.width/8, 425, size = 20)
-    drawLabel(app.populationSize, (app.width/8), 450, size = 20)
-    drawLabel('Radius of infection', (app.width/8), 500, size = 20)
-    drawLabel(app.viralRadius, (app.width/8), 525, size = 20)
-    drawLabel('Percentage Immune', (app.width/8), 575, size = 20)
-    drawLabel(calculatePercentageImmune(app), (app.width/8), 600, size = 20)
-    drawLabel('Percentage Infected', (app.width/8), 650, size = 20)
-    drawLabel(calculatePercentageInfected(app), (app.width/8), 675, size = 20)
-    drawLabel('Percentage Healthy', (app.width/8), 725, size = 20)
-    drawLabel(calculatePercentageHealthy(app), (app.width/8),750, size = 20)
-
-def main_onStep(app):
-    if not app.paused:
-        countInfected = 0
-        countHealthy = 0
-        for person in app.populationAllMembers:
-            if person.type == 'infected':
-                countInfected +=1
-        for person in app.populationAllMembers:
-            if person.type == 'healthy':
-                countHealthy +=1
-        app.populationChange.append(countInfected)
-        app.dictChangeOverTimeInfected[app.day] = countInfected
-        app.dictChangeOverTimeHealthy[app.day] = countHealthy
-        app.day += 1
-
-    if not app.paused and not isSimulationFinished(app):
-        spreadInfection(app)
-    if isSimulationFinished(app):
-        app.paused = True
-        app.finished = True
-
-def main_onMousePress(app, mouseX, mouseY):
-    for person in app.populationHealthyMembers:
-        if distance(person.xVal, mouseX, person.yVal, mouseY) <= 10:
-            person.changeTypeColor('immune','lightBlue')
-            app.populationHealthyMembers.remove(person)
-            app.populationImmuneMembers.append(person)
-    if distance(mouseX, app.pauseButtonX, mouseY, app.pauseButtonY) <= 20:
-        app.paused = True
-    if distance(mouseX, app.playButtonX, mouseY, app.playButtonY) <= 20:
-        app.paused = False 
-
-def main_onMouseDrag(app, mouseX, mouseY):
-    for person in app.populationHealthyMembers:
-        if distance(person.xVal, mouseX, person.yVal, mouseY) <= 10:
-            person.changeTypeColor('immune','lightBlue')
-            app.populationHealthyMembers.remove(person)
-            app.populationImmuneMembers.append(person)
-
-def main_onKeyPress(app, key):
-    if key == 'r':
-        resetApp(app)
-        setActiveScreen('parameters')
+##### Welcome screen functions
 
 def welcome_redrawAll(app):
     drawBackground(app)
@@ -161,18 +74,43 @@ def welcome_redrawAll(app):
     drawLabel('Simulator',app.width/2.05, (app.height/8.1)*4, size = 110,bold = True, fill = 'seaGreen', border = 'black')
     drawLabel('Press the space bar to begin the simulation', app.width/2, (app.height/16)*14, size = 30, fill = 'white', bold = True)
     
-def drawBackground(app):
-    imageWidth, imageHeight = getImageSize(app.vb)
-    drawImage(app.vb, app.width/2, app.height/2, align='center',
-              width=imageWidth, height=imageHeight)
-
-def openImage(fileName):
-        return Image.open(os.path.join(pathlib.Path(__file__).parent,fileName))
-
 def welcome_onKeyPress(app, key):
     if key == 'space':
-        setActiveScreen('parameters')
-    
+        setActiveScreen('virusName')
+
+#### VirusName screen functions
+
+def virusName_redrawAll(app):
+    drawBackground(app)
+    drawLabel('Press the space bar to begin the simulation', app.width/2, (app.height/16)*14, size = 30, fill = 'white', bold = True)
+    drawRect((app.width/20),(app.height/8)+50,(app.width/20)*18,(app.height/4)+100, fill = 'white')
+    drawLabel("Welcome to Community Immunity Simlutor", app.width/2, app.height/8, size = 45, fill = 'white', bold= True)
+    drawLabel("Name your virus!", app.width/2,(app.height/8)*2-40, size = 30, fill = 'black', bold = True)
+    drawLabel("Press Enter to begin typing your virus name",app.width/2,(app.height/8)*2+50, size = 25, fill = 'black')
+    drawLabel("Type characters to add to your virus name.",app.width/2,(app.height/8)*2+100, size = 25, fill = 'black')
+    drawLabel('Press backspace to remove from your virus name',app.width/2,(app.height/8)*2+150, size = 25, fill = 'black')
+    drawLabel("Press Enter again when finished typing your virus name",app.width/2,(app.height/8)*2+200, size = 25, fill = 'black')
+    drawLabel(f'Virus name: {app.virusName}', app.width/2,(app.height/8)*6-100, size = 45, fill = 'white', bold = True)
+    if app.virusNameWarning:
+        drawLabel('You must enter a virus name!', app.width/2, (app.height/8)*6, size = 45, fill='red', bold = True)
+
+def virusName_onKeyPress(app, key):
+    if key == 'space':
+        if len(app.virusName) != 0:
+            setActiveScreen('parameters')
+        else:
+            app.virusNameWarning = True
+    if key == 'enter':
+        app.enteringName = not app.enteringName
+    if app.enteringName:
+        if key == 'backspace':
+            app.virusName = app.virusName[:-1]
+        elif key != 'enter': 
+            if len(app.virusName) < 10:
+                app.virusName+=key
+        
+#### Parameters screen functions 
+
 def parameters_onKeyPress(app, key):
     if key == 'space':
         setActiveScreen('main')
@@ -180,7 +118,6 @@ def parameters_onKeyPress(app, key):
 def parameters_redrawAll(app):
     drawBackground(app)
     drawLabel("Welcome to Community Immunity Simlutor", app.width/2, app.height/8, size = 45, fill = 'white', bold= True)
-    drawLabel('Select your parameters', app.width/2, (app.height/16)*3, size = 20, fill = 'white', bold = True)
     drawLabel('Press the space bar to begin the simulation', app.width/2, (app.height/16)*14, size = 30, fill = 'white', bold = True)
     getPathogenParameters(app)
     
@@ -204,10 +141,192 @@ def parameters_onMouseRelease(app, mouseX, mouseY):
     app.immuneSelected = False
 
 def parameters_onMouseDrag(app, mouseX, mouseY):
-    sliderSelection(app, mouseX, mouseY)
+    if app.populationSelected:
+        if ((app.width/8)*4) <= mouseX and mouseX <= ((app.height/8)*7):
+            distanceDotFromStart = distance(mouseX,((app.width/8)*4),mouseY, (app.height/8)*3)
+            if distanceDotFromStart <= 20:
+                app.populationSize =10
+            elif distanceDotFromStart >= 20 and distanceDotFromStart <=40:
+                app.populationSize =20
+            elif distanceDotFromStart >= 40 and distanceDotFromStart <=80:
+                app.populationSize =40
+            elif distanceDotFromStart >= 80 and distanceDotFromStart <=100:
+                app.populationSize =80
+            elif distanceDotFromStart >= 100 and distanceDotFromStart <=120:
+                app.populationSize =100
+            elif distanceDotFromStart >= 120 and distanceDotFromStart <=140:
+                app.populationSize =120
+            elif distanceDotFromStart >= 140 and distanceDotFromStart <=180:
+                app.populationSize =140
+            elif distanceDotFromStart >= 180 and distanceDotFromStart <=200:
+                app.populationSize =160
+            elif distanceDotFromStart >= 200 and distanceDotFromStart <=220:
+                app.populationSize =180
+            elif distanceDotFromStart >= 220 and distanceDotFromStart <=240:
+                app.populationSize =200
+            elif distanceDotFromStart >= 240 and distanceDotFromStart <=280:
+                app.populationSize =220
+            elif distanceDotFromStart >= 280 and distanceDotFromStart <=300:
+                app.populationSize =240
+            elif distanceDotFromStart >= 300 and distanceDotFromStart <=320:
+                app.populationSize =280
+            elif distanceDotFromStart >= 320 and distanceDotFromStart <=340:
+                app.populationSize =300
+            elif distanceDotFromStart >= 340 and distanceDotFromStart <=400:
+                app.populationSize =320
+            app.populationSelectorCircleX = mouseX
+    if app.radiusSelected:
+        if ((app.width/8)*4) <= mouseX and mouseX <= (app.width/8)*7:
+            distanceDotFromStart = distance(mouseX,((app.width/8)*4),mouseY, (app.height/4+25))
+            if distanceDotFromStart <= 50:
+                app.viralRadius = 10
+            elif distanceDotFromStart >= 50 and distanceDotFromStart <=100:
+                app.viralRadius =20
+            elif distanceDotFromStart >= 150 and distanceDotFromStart <=200:
+                app.viralRadius =40
+            elif distanceDotFromStart >= 250 and distanceDotFromStart <=300:
+                app.viralRadius =80
+            elif distanceDotFromStart >= 350 and distanceDotFromStart <=400:
+                app.viralRadius =100
+            app.radiusSelectorCircleX = mouseX
+    if app.reproductionNumberSelected:
+        if ((app.width/8)*4) <= mouseX and mouseX <= (app.width/8)*7:
+            distanceDotFromStart = distance(mouseX,app.width/2,mouseY, app.height/2)
+            if distanceDotFromStart <= 50:
+                app.reproductionNumber = 10
+            elif distanceDotFromStart >= 50 and distanceDotFromStart <=100:
+                app.reproductionNumber =20
+            elif distanceDotFromStart >= 150 and distanceDotFromStart <=200:
+                app.reproductionNumber =40
+            elif distanceDotFromStart >= 250 and distanceDotFromStart <=300:
+                app.reproductionNumber =80
+            elif distanceDotFromStart >= 350 and distanceDotFromStart <=400:
+                app.reproductionNumber =100
+            app.reproductionNumberSelectorCircleX = mouseX
+    if app.infectedSelected:
+        if ((app.width/8)*4) <= mouseX and mouseX <= (app.width/8)*7:
+            distanceDotFromStart = distance(mouseX,app.width/2,mouseY, (app.height/8)*5)
+            if distanceDotFromStart <= 50:
+                app.initialInfectedCount = 1
+            elif distanceDotFromStart >= 50 and distanceDotFromStart <=100:
+                app.initialInfectedCount =2
+            elif distanceDotFromStart >= 150 and distanceDotFromStart <=200:
+                app.initialInfectedCount =3
+            elif distanceDotFromStart >= 250 and distanceDotFromStart <=300:
+                app.initialInfectedCount =4
+            elif distanceDotFromStart >= 350 and distanceDotFromStart <=400:
+                app.initialInfectedCount = 5
+            app.infectedSelectorCircleX = mouseX
+    if app.immuneSelected:
+        if ((app.width/8)*4) <= mouseX and mouseX <= (app.width/8)*7:
+            distanceDotFromStart = distance(mouseX,app.width/2,mouseY, (app.height/8)*6)
+            if distanceDotFromStart <= 50:
+                app.initialVaccinatedCount = 1
+            elif distanceDotFromStart >= 50 and distanceDotFromStart <=100:
+                app.initialVaccinatedCount =2
+            elif distanceDotFromStart >= 150 and distanceDotFromStart <=200:
+                app.initialVaccinatedCount =3
+            elif distanceDotFromStart >= 250 and distanceDotFromStart <=300:
+                app.initialVaccinatedCount =4
+            elif distanceDotFromStart >= 350 and distanceDotFromStart <=400:
+                app.initialVaccinatedCount = 5
+            app.immuneSelectorCircleX = mouseX
+
+#### Main screen functions
+
+def main_redrawAll(app):
+    drawBackground(app)
+    if len(app.populationInfectedMembers) == 0:
+        generateInfectedMemberMiddle(app)
+        generateVaccinatedMember(app)
+        if len(app.populationInfectedMembers) == 0:
+            generateInfectedMemberRandom(app)
+    drawMainLabels(app)
+    drawPlayAndPause(app)
+    drawMutationButton(app)
+    if app.finished == False:
+        drawPopulation(app)
+        drawConnections(app)
+        if app.mutate == True:
+            drawMutationLabels(app)
+    else:
+        drawPopulation(app)
+        drawConnections(app)
+        setActiveScreen('finished')
+
+def main_onStep(app):
+    if not app.paused:
+        countInfected = 0
+        countHealthy = 0
+        for person in app.populationAllMembers:
+            if person.type == 'infected':
+                countInfected +=1
+        for person in app.populationAllMembers:
+            if person.type == 'healthy':
+                countHealthy +=1
+        app.populationChange.append(countInfected)
+        app.dictChangeOverTimeInfected[app.day] = countInfected
+        app.dictChangeOverTimeHealthy[app.day] = countHealthy
+        app.day += 1
+    if not app.paused and not isSimulationFinished(app):
+        spreadInfection(app)
+    if isSimulationFinished(app):
+        app.paused = True
+        app.finished = True
+
+def main_onMousePress(app, mouseX, mouseY):
+    for person in app.populationHealthyMembers:
+        if distance(person.xVal, mouseX, person.yVal, mouseY) <= 10:
+            person.changeTypeColor('immune','lightBlue')
+            app.populationHealthyMembers.remove(person)
+            app.populationImmuneMembers.append(person)
+    if distance(mouseX, app.pauseButtonX, mouseY, app.pauseButtonY) <= 20:
+        app.paused = True
+    if distance(mouseX, app.playButtonX, mouseY, app.playButtonY) <= 20:
+        app.paused = False 
+    if distance(mouseX, app.mutationX, mouseY, app.mutationY) <= app.mutationRadius:
+        app.mutate = True
+        generateMutation(app)
+        app.paused = True
+
+def main_onMouseDrag(app, mouseX, mouseY):
+    for person in app.populationHealthyMembers:
+        if distance(person.xVal, mouseX, person.yVal, mouseY) <= 10:
+            person.changeTypeColor('immune','lightBlue')
+            app.populationHealthyMembers.remove(person)
+            app.populationImmuneMembers.append(person)
+
+def main_onKeyPress(app, key):
+    if key == 'r':
+        resetApp(app)
+        setActiveScreen('parameters')
+
+#### Finished screen functions
+
+def finished_redrawAll(app):
+    drawBackground(app)
+    drawRect(150,250,700,450,fill = 'white')
+    drawGraph(app)
+    drawLabel('Your simulation is complete!',app.width/2,100, size = 50, fill = 'white', bold = True)
+    if len(app.populationInfectedMembers) <= 1:
+        drawLabel(f'You infected {len(app.populationInfectedMembers)} person with {app.virusName} across {len(app.dictChangeOverTimeInfected)} days',app.width/2,200, size = 25, fill = 'white', bold = True)
+    else:
+        drawLabel(f'You infected {len(app.populationInfectedMembers)} people with {app.virusName} across {len(app.dictChangeOverTimeInfected)} days',app.width/2,200, size = 25, fill = 'white', bold = True)
+
+#### Universal functions used in all screens
+
+def drawBackground(app):
+    imageWidth, imageHeight = getImageSize(app.vb)
+    drawImage(app.vb, app.width/2, app.height/2, align='center',
+              width=imageWidth, height=imageHeight)
+
+def openImage(fileName):
+        return Image.open(os.path.join(pathlib.Path(__file__).parent,fileName))    
 
 def distance(x1,x2,y1,y2):
     return ((x2-x1)**2+(y2-y1)**2)**.5
+
+#### Call main
 
 def main():
     runAppWithScreens(initialScreen = 'welcome', width = 1000, height = 1000)

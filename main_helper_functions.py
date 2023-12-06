@@ -31,6 +31,35 @@ def drawPlayAndPause(app):
     drawRect(app.pauseButtonX-10,app.pauseButtonY-10, 8, 20, fill = 'black')
     drawRect(app.pauseButtonX+2,app.pauseButtonY-10, 8, 20, fill = 'black')
 
+def drawMainLabels(app):
+    drawRect(20, 200, 215, (app.height/8)+10, fill = 'lavender')
+    drawLabel('Key',(20+215)/2, 210,size = 20)
+    drawCircle(40,250, 10, fill = 'seaGreen')
+    drawLabel(' = Healthy', 100, 250, align = 'center', size = 20)
+    drawCircle(40,280, 10, fill = 'red')
+    drawLabel(' = Infected', 100, 280, align = 'center', size = 20)
+    drawCircle(40,310, 10, fill = 'lightBlue', border = 'black')
+    drawLabel(' = Immune', 100, 310, align = 'center', size = 20)
+    drawLine(app.populationLeftBoundary-10, app.populationTopBoundary-10, app.populationRightBoundary+10, app.populationTopBoundary-10)
+    drawLine(app.populationLeftBoundary-10, app.populationTopBoundary-10, app.populationLeftBoundary-10, app.populationBottomBoundary+10)
+    drawLine(app.populationLeftBoundary-10, app.populationBottomBoundary+10, app.populationRightBoundary+10, app.populationBottomBoundary+10)
+    drawLine(app.populationRightBoundary+10, app.populationBottomBoundary+10, app.populationRightBoundary+10, app.populationTopBoundary-10)
+    drawRect(app.populationLeftBoundary-10,app.populationTopBoundary-10, (app.populationRightBoundary+10)-(app.populationLeftBoundary-10),abs((app.populationTopBoundary-10)-(app.populationBottomBoundary+10)), fill = 'white')
+    drawLabel("Community Immunity Simulator", app.width/2, app.height/16, size = 50, bold = True, fill = 'white')
+    drawLabel('Press r key to reset simulator',(app.width/4)*3+60, (app.height/18)*2, size = 20,bold = True, fill = 'white' )
+    drawLabel('Click on a person or hold down and drag to immunize',(app.width/4)*1+60, (app.height/18)*2, size = 23,bold = True, fill = 'black' )
+    drawRect(20, 400, 215, 400, fill = 'lavender')
+    drawLabel('Size of Population', app.width/8, 425, size = 20)
+    drawLabel(app.populationSize, (app.width/8), 450, size = 20)
+    drawLabel('Radius of infection', (app.width/8), 500, size = 20)
+    drawLabel(app.viralRadius, (app.width/8), 525, size = 20)
+    drawLabel('Percentage Immune', (app.width/8), 575, size = 20)
+    drawLabel(calculatePercentageImmune(app), (app.width/8), 600, size = 20)
+    drawLabel('Percentage Infected', (app.width/8), 650, size = 20)
+    drawLabel(calculatePercentageInfected(app), (app.width/8), 675, size = 20)
+    drawLabel('Percentage Healthy', (app.width/8), 725, size = 20)
+    drawLabel(calculatePercentageHealthy(app), (app.width/8),750, size = 20)
+
 def generateInfectedMemberMiddle(app):
     boardCenterX = (app.populationRightBoundary+app.populationLeftBoundary)//2 
     boardCenterY = (app.populationTopBoundary+app.populationBottomBoundary)//2
@@ -92,6 +121,30 @@ def generatePopulation(app):
         newPerson = person(xVal, yVal, 'healthy', 'mediumSeaGreen')
         app.populationHealthyMembers.append(newPerson)
         app.populationAllMembers.append(newPerson)
+
+def generateMutation(app):
+    possiblyParamsAndValues = {'app.viralRadius':[10,20,40,80,100],'app.reproductionNumber':[10,20,40,80,100]}
+    chosenParam = rand.choice(list(possiblyParamsAndValues.keys()))
+    if chosenParam == 'app.viralRadius':
+        possiblyParamsAndValues[chosenParam].remove(app.viralRadius)
+        value = rand.choice(possiblyParamsAndValues[chosenParam]) 
+        app.viralRadius = value
+        app.mutatedParameter = 'radius'
+    else:
+        possiblyParamsAndValues[chosenParam].remove(app.reproductionNumber)
+        value = rand.choice(possiblyParamsAndValues[chosenParam]) 
+        app.reproductionNumber = value 
+        app.mutatedParameter = 'reproductionNum'
+
+def drawMutationButton(app):
+    drawCircle(app.mutationX, app.mutationY, app.mutationRadius, fill = 'red')
+    drawLabel('MUTATE!', app.mutationX, app.mutationY, size = 16, fill = 'white', bold = True)
+
+def drawMutationLabels(app):
+    if app.mutatedParameter == 'radius':
+        drawLabel(f"{app.virusName} has mutated! The viral radius has changed to {app.viralRadius}",450, 900, size = 20, fill = 'red', bold = True)
+    else:
+        drawLabel(f"{app.virusName} has mutated! The percent of transmission has changed to {app.reproductionNumber}",450, 900, size = 20, fill = 'red', bold = True)
 
 def isSimulationFinished(app):
     count = 0
