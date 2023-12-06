@@ -82,6 +82,7 @@ def welcome_onKeyPress(app, key):
 
 def virusName_redrawAll(app):
     drawBackground(app)
+    drawLabel('Press the space bar to begin the simulation', app.width/2, (app.height/16)*14, size = 30, fill = 'white', bold = True)
     drawRect((app.width/20),(app.height/8)+50,(app.width/20)*18,(app.height/4)+100, fill = 'white')
     drawLabel("Welcome to Community Immunity Simlutor", app.width/2, app.height/8, size = 45, fill = 'white', bold= True)
     drawLabel("Name your virus!", app.width/2,(app.height/8)*2-40, size = 30, fill = 'black', bold = True)
